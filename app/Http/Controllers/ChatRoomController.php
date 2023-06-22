@@ -58,6 +58,7 @@ class ChatRoomController extends Controller
                 "users.lastname as csr_lastname",
                 "transaction",
                 "caller_id"
+                
             )
             ->where('call_queues.id', $call_queue->id)
             ->firstOrFail();

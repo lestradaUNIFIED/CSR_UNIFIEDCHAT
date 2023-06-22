@@ -18,13 +18,13 @@ class CallQueueController extends Controller
         $callQueue = CallQueue::findOrFail($id);
         $callQueue->update($request->all());
 
-        $chat_room = ChatRoom::where('customer_id', $request->customer_id)->firstOrFail();
+        $chat_room = ChatRoom::where('id', $request->room_id)->firstOrFail();
         $chat_room->user_id = $request->csr_id;
         $chat_room->chat_name = $request->chat_name;
         
         $chat_room->save();     
 
-        return CallQueue::join('chat_rooms', 'chat_rooms.customer_id', '=', 'call_queues.caller_id')
+        return CallQueue::join('chat_rooms', 'chat_rooms.id', '=', 'call_queues.caller_id')
             ->select('call_queues.*', 'chat_rooms.room_code', 'chat_rooms.id as roomId')
             ->where('call_queues.id', $id)
             ->get();
