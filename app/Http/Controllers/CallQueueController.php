@@ -19,7 +19,6 @@ class CallQueueController extends Controller
 
     function updateQueue(Request $request, $id)
     {
-
         // \Log::info($request);
         $callQueue = CallQueue::findOrFail($id);
         $callQueue->update($request->all());
