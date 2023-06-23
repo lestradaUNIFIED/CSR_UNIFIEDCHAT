@@ -11,6 +11,10 @@ class ChatMessageController extends Controller
 {
     //
 
+    function index()
+    {
+            return ChatMessage::all();
+    }
     function saveMessage(Request $request)
     {
 

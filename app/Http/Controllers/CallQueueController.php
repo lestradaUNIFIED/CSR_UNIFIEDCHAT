@@ -11,6 +11,12 @@ class CallQueueController extends Controller
 {
     //
 
+    function index() {
+        return CallQueue::all();
+    }
+
+
+
     function updateQueue(Request $request, $id)
     {
 
