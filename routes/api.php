@@ -23,7 +23,7 @@ use App\Models\Caller;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::apiResource('posts', PostController::class)->middleware('auth:sanctum');
+//Route::apiResource('posts', PostController::class)->middleware('auth:sanctum');
 Route::post('/login', [AuthController::class, 'loginUser']);
 Route::get('/callqueues', [CallerController::class, 'index']);
 Route::put('/update-queue/{id}', [CallQueueController::class, 'updateQueue']);
