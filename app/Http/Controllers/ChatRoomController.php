@@ -23,6 +23,13 @@ class ChatRoomController extends Controller
         return ChatRoom::where('user_id', $csr_id)
             ->get();
     }
+
+    function validateChatRoom(Request $request)
+    {
+
+        return ChatRoom::where('room_code', $request->room_code)->get();
+
+    }
     function createChatRoom(Request $request)
     {
 

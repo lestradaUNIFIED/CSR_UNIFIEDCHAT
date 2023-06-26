@@ -15,7 +15,9 @@ class ChatRoom extends Model
         'room_code',
         'user_id',
         'current_queue_id',
-        'last_message'
+        'last_message',
+        'status_code',
+        'status_desc'
      ];
 
   

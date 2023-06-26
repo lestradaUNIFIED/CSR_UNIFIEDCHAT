@@ -26,13 +26,20 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //Route::apiResource('posts', PostController::class)->middleware('auth:sanctum');
 Route::post('/login', [AuthController::class, 'loginUser']);
 Route::get('/callqueues', [CallerController::class, 'index']);
+
 Route::put('/update-queue/{id}', [CallQueueController::class, 'updateQueue']);
+Route::put('/queue/action/4/{id}', [CallQueueController::class, 'closeQueue']);
+
+
 Route::post('/chat-room', [ChatRoomController::class, 'createChatRoom']);
+Route::post('/chat-room/action/1', [ChatRoomController::class, 'validateChatRoom']);
 Route::get('/chat-room/{customer_id}/{room_code}', [ChatRoomController::class, 'joinRoom']);
 Route::get('/chat-rooms/{csr_id}', [ChatRoomController::class, 'chatRoomByCSR']);
+
 Route::get('/chat-message/messages/{room_id}', [ChatMessageController::class, 'loadChatMessage']);
-Route::get('/caller/info/{id}', [CallerController::class, 'getCustomer']);
 Route::post('/chat-message/message', [ChatMessageController::class, 'saveMessage']);
+
+Route::get('/caller/info/{id}', [CallerController::class, 'getCustomer']);
 
 
 Route::get('test', function() {

@@ -11,7 +11,8 @@ class CallQueueController extends Controller
 {
     //
 
-    function index() {
+    function index()
+    {
         return CallQueue::all();
     }
 
@@ -26,15 +27,30 @@ class CallQueueController extends Controller
         $chat_room = ChatRoom::where('id', $request->room_id)->firstOrFail();
         $chat_room->user_id = $request->csr_id;
         $chat_room->chat_name = $request->chat_name;
-        
-        $chat_room->save();     
+        $chat_room->status_code = '2';
+        $chat_room->status_desc = 'ONGOING';
 
-         return response()->json(['queue' => $callQueue, 'chat_room' => $chat_room]);
+        $chat_room->save();
+
+        return response()->json(['queue' => $callQueue, 'chat_room' => $chat_room]);
         // return CallQueue::join('chat_rooms', 'chat_rooms.id', '=', 'call_queues.caller_id')
         //     ->select('call_queues.*', 'chat_rooms.room_code', 'chat_rooms.id as roomId')
         //     ->where('call_queues.id', $id)
         //     ->get();
     }
+
+    function closeQueue(Request $request, $id)
+    {
+        $chatRoom = ChatRoom::where('id', $request->room_id)->firstOrFail();
+        $chatRoom->status_desc = 'DONE';
+        $chatRoom->status_code = '3';
+        $chatRoom->save();
+
+        $callQueue = CallQueue::findOrFail($id);
+        return response()->json(["status_code" => $chatRoom->status_code]);
+
+    }
+
 
 
 
