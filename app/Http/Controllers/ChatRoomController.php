@@ -40,10 +40,15 @@ class ChatRoomController extends Controller
                 'errors' => $validateUser->errors()
             ], 401);
         }
-        $chat_room = ChatRoom::create($request->all());
-        $chat_room_id = $chat_room->id;
 
         $call_queue = CallQueue::create(['caller_id' => $request->customer_id, 'transaction' => $request->transaction]);
+
+        $chat_room = ChatRoom::updateOrCreate(
+            ['customer_id' => $request->customer_id],
+            ['current_queue_id' => $call_queue->id]
+        );
+        $chat_room_id = $chat_room->id;
+
         $call_queue_callers = Caller::join('call_queues', 'call_queues.caller_id', '=', 'callers.id')
             ->leftJoin('users', 'call_queues.csr_id', '=', 'users.id')
             ->select(
@@ -58,19 +63,20 @@ class ChatRoomController extends Controller
                 "users.lastname as csr_lastname",
                 "transaction",
                 "caller_id"
-                
+
             )
             ->where('call_queues.id', $call_queue->id)
             ->firstOrFail();
 
 
-        return response()->json(['queue'=>$call_queue_callers, 'chat_room'=>$chat_room]);
+        return response()->json(['queue' => $call_queue_callers, 'chat_room' => $chat_room]);
 
     }
 
-    function joinRoom(Request $request, $customer_id, $room_code) {
+    function joinRoom(Request $request, $customer_id, $room_code)
+    {
         $chat_room = ChatRoom::where('room_code', $room_code)->firstOrFail();
-   
+
         $call_queue = CallQueue::where('caller_id', $customer_id)->firstOrFail();
         $call_queue_callers = Caller::join('call_queues', 'call_queues.caller_id', '=', 'callers.id')
             ->leftJoin('users', 'call_queues.csr_id', '=', 'users.id')
@@ -91,7 +97,7 @@ class ChatRoomController extends Controller
             ->firstOrFail();
 
 
-        return response()->json(['queue'=>$call_queue_callers, 'chat_room'=>$chat_room]);
+        return response()->json(['queue' => $call_queue_callers, 'chat_room' => $chat_room]);
 
     }
 }

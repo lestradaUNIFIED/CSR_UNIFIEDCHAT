@@ -13,7 +13,8 @@ class ChatRoom extends Model
         'customer_id',
         'chat_name',
         'room_code',
-        'user_id'
+        'user_id',
+        'current_queue_id'
      ];
 
   
