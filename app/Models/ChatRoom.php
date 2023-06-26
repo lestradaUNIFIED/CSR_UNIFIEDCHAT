@@ -14,7 +14,8 @@ class ChatRoom extends Model
         'chat_name',
         'room_code',
         'user_id',
-        'current_queue_id'
+        'current_queue_id',
+        'last_message'
      ];
 
   
