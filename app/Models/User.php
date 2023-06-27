@@ -24,7 +24,9 @@ class User extends Authenticatable
         'userid',
         'password',
         'email',
-        'acess_level'
+        'acess_level',
+        'created_by_userid',
+        'updated_by_userid'
     ];
 
     /**

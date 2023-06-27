@@ -7,6 +7,7 @@ use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ChatRoomController;
 
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\Caller;
@@ -25,6 +26,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 //Route::apiResource('posts', PostController::class)->middleware('auth:sanctum');
 Route::post('/login', [AuthController::class, 'loginUser']);
+Route::post('/user', [UserController::class, 'createUser']);
+
 Route::get('/callqueues', [CallerController::class, 'index']);
 
 Route::put('/update-queue/{id}', [CallQueueController::class, 'updateQueue']);
