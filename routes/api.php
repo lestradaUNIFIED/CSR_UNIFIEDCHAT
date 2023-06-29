@@ -26,7 +26,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 //Route::apiResource('posts', PostController::class)->middleware('auth:sanctum');
 Route::post('/login', [AuthController::class, 'loginUser']);
+Route::get('/user/{id}', [AuthController::class, 'userInfo']);
 Route::post('/user', [UserController::class, 'createUser']);
+
 
 Route::get('/callqueues', [CallerController::class, 'index']);
 

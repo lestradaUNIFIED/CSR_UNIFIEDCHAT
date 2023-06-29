@@ -8,10 +8,32 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Throwable;
 
 class AuthController extends Controller
 {
     //
+
+    public function userInfo(Request $request, $id)
+    {
+        try {
+
+            $user = User::find($id);
+            
+            return response()->json([
+                'status' => true,
+                'message' => 'Loaded',
+                'token' => $user->remember_token,
+                'type' => 'bearer',
+                'user' => $user
+            ], 200); 
+
+        } catch (Throwable $th) {
+
+            return ($th);
+
+        }
+    }
 
     public function loginUser(Request $request)
     {
@@ -30,8 +52,8 @@ class AuthController extends Controller
                     'errors' => $validateUser->errors()
                 ], 401);
             }
-
-            if (!Auth::attempt($request->only(['userid', 'password']))) {
+            $authAttempt = Auth::attempt($request->only(['userid', 'password']));
+            if (!$authAttempt) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Invalid User Credentials'
@@ -39,22 +61,40 @@ class AuthController extends Controller
             }
 
             $user = User::where('userid', $request->userid)->firstOrFail();
-            
-            $token = $user->createToken('API TOKEN')->plainTextToken;
-            $user->remember_token = $token;
-            $user->save();
+
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+
+            //$user = User::where('userid', $request->userid)->firstOrFail();
+
+            // $token = $user->createToken('API TOKEN')->plainTextToken;
+            //$user->remember_token = $token;
+            // $user->save();
 
             return response()->json([
                 'status' => true,
                 'message' => 'User Credentials OK',
                 'token' => $token,
+                'type' => 'bearer',
                 'user' => $user
             ], 200);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             return response()->json([
                 'status' => false,
                 'message' => $th->getMessage()
             ], 500);
         }
+    }
+
+    public function refresh()
+    {
+        return response()->json([
+            'status' => 'success',
+            'user' => Auth::user(),
+            'authorisation' => [
+                'token' => Auth::refresh(),
+                'type' => 'bearer',
+            ]
+        ]);
     }
 }
