@@ -7,6 +7,7 @@ use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ChatRoomController;
 
+use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +29,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/login', [AuthController::class, 'loginUser']);
 Route::get('/user/{id}', [AuthController::class, 'userInfo']);
 Route::post('/user', [UserController::class, 'createUser']);
+Route::get('/user', [UserController::class, 'user']);
 
 
 Route::get('/callqueues', [CallerController::class, 'index']);
@@ -46,6 +48,7 @@ Route::post('/chat-message/message', [ChatMessageController::class, 'saveMessage
 
 Route::get('/caller/info/{id}', [CallerController::class, 'getCustomer']);
 
+Route::post('/reports/queue', [ReportsController::class, 'queue']);
 
 Route::get('test', function() {
     event(new App\Events\Test());

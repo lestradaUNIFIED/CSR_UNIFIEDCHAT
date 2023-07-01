@@ -6,19 +6,28 @@ use Illuminate\Http\Request;
 use Throwable;
 use Validator;
 use \App\Models\User;
+
 class UserController extends Controller
 {
     //
 
-    function createUser(Request $request) {
+    public function user(Request $request)
+    {
+        return User::whereNotNull('id')->orderBy('id', 'desc')->get();
+    }
+
+    function createUser(Request $request)
+    {
         try {
-            $validateUser = Validator::make($request->all(), [
-                'lastname' => 'required',
-                'firstname' => 'required',
-                'email' => ['email', 'required'],
-                'userid' => 'required',
-                'password' => 'required'
-            ]
+            $validateUser = Validator::make(
+                $request->all(),
+                [
+                    'lastname' => 'required',
+                    'firstname' => 'required',
+                    'email' => ['email', 'required'],
+                    'userid' => 'required',
+                    'password' => 'required'
+                ]
             );
             if ($validateUser->fails()) {
                 return response()->json([
@@ -29,10 +38,9 @@ class UserController extends Controller
             }
             User::create($request->all());
             return response()->json(['status' => 201, "statusText" => "Created"]);
-        }
-        catch(Throwable $err) {
+        } catch (Throwable $err) {
             return $err;
         }
-    
+
     }
 }
