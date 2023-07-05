@@ -47,6 +47,7 @@ class CallQueueController extends Controller
         $chatRoom->save();
 
         $callQueue = CallQueue::findOrFail($id);
+        $callQueue->update($request->all());
         return response()->json(["status_code" => $chatRoom->status_code]);
 
     }

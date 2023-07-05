@@ -12,6 +12,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\Caller;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -30,6 +31,7 @@ Route::post('/login', [AuthController::class, 'loginUser']);
 Route::get('/user/{id}', [AuthController::class, 'userInfo']);
 Route::post('/user', [UserController::class, 'createUser']);
 Route::get('/user', [UserController::class, 'user']);
+Route::put('/user/{id}', [AuthController::class, 'updateUser']);
 
 
 Route::get('/callqueues', [CallerController::class, 'index']);
@@ -42,6 +44,7 @@ Route::post('/chat-room', [ChatRoomController::class, 'createChatRoom']);
 Route::post('/chat-room/action/1', [ChatRoomController::class, 'validateChatRoom']);
 Route::get('/chat-room/{customer_id}/{room_code}', [ChatRoomController::class, 'joinRoom']);
 Route::get('/chat-rooms/{csr_id}', [ChatRoomController::class, 'chatRoomByCSR']);
+Route::get('/chat-rooms', [ChatRoomController::class, 'index']);
 
 Route::get('/chat-message/messages/{room_id}', [ChatMessageController::class, 'loadChatMessage']);
 Route::post('/chat-message/message', [ChatMessageController::class, 'saveMessage']);
@@ -50,10 +53,7 @@ Route::get('/caller/info/{id}', [CallerController::class, 'getCustomer']);
 
 Route::post('/reports/queue', [ReportsController::class, 'queue']);
 
-Route::get('test', function() {
+Route::get('test', function () {
     event(new App\Events\Test());
     return "Event sent!";
 });
-
-
-

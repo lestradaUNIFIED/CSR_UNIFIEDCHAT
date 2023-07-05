@@ -19,20 +19,35 @@ class AuthController extends Controller
         try {
 
             $user = User::find($id);
-            
+
             return response()->json([
                 'status' => true,
                 'message' => 'Loaded',
                 'token' => $user->remember_token,
                 'type' => 'bearer',
                 'user' => $user
-            ], 200); 
+            ], 200);
 
         } catch (Throwable $th) {
 
             return ($th);
 
         }
+    }
+
+    public function updateUser(Request $request, $id)
+    {
+        try {
+
+            $user = User::find($id);
+
+            return $user->update($request->all());
+
+        } catch (Throwable $th) {
+
+            return $th;
+        }
+
     }
 
     public function loginUser(Request $request)

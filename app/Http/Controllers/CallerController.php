@@ -20,7 +20,6 @@ class CallerController extends Controller
             ->get();
     }
 
-
     public function getCustomer(Request $request, $id) {
             return Caller::find($id);
     }

@@ -13,14 +13,15 @@ use Validator;
 class ChatRoomController extends Controller
 {
     //
-    function index()
+    public function index()
     {
-        return ChatRoom::all();
+        return ChatRoom::where('current_queue_id', '>', 0)->get();
     }
 
     function chatRoomByCSR(Request $request, $csr_id)
     {
         return ChatRoom::where('user_id', $csr_id)
+            ->where('current_queue_id', '>', 0)
             ->get();
     }
 
@@ -52,7 +53,7 @@ class ChatRoomController extends Controller
 
         $chat_room = ChatRoom::updateOrCreate(
             ['customer_id' => $request->customer_id],
-            ['current_queue_id' => $call_queue->id]
+            ['current_queue_id' => $call_queue->id, 'chat_name' => $request->chat_name]
         );
         $chat_room_id = $chat_room->id;
 
