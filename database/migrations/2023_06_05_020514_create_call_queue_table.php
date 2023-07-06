@@ -18,11 +18,13 @@ return new class extends Migration
             $table->integer('caller_id')->default(null);
             $table->integer('csr_id')->default(null);
             $table->enum('queue_status', ['START', 'CHAT ONQUEUE', 'CHAT ONGOING', 'VIDEO CALL ONQUEUE', 'VIDEO CALL ONGOING', 'ENDED'])->default('START');
-            $table->timestamp('date_onqueue')->useCurrent();
-            $table->timestamp('date_ongoing')->default(null);
-            $table->timestamp('date_end')->default(null);
+            $table->timestamp('date_onqueue')->nullable()->default(null);
+            $table->timestamp('date_ongoing')->nullable()->default(null);
+            $table->timestamp('date_end')->nullable()->default(null);
+            $table->string('duration')->default('00:00:00');
+            $table->string('transaction')->nullable()->default(null);
             $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrentOnUpdate();
+            $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate();
             
         });
     }

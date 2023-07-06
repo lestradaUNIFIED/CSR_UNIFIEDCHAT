@@ -6,11 +6,13 @@ use Illuminate\Http\Request;
 
 use App\Models\Caller;
 
+
 class CallerController extends Controller
 {
     //
     public function index()
     {
+
         return Caller::join('call_queues',  'call_queues.caller_id', '=', 'callers.id')
             ->join('chat_rooms', 'chat_rooms.current_queue_id', '=', 'call_queues.id')
             ->leftJoin('users', 'call_queues.csr_id', '=', 'users.id')

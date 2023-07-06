@@ -18,6 +18,9 @@ class ChatRoomController extends Controller
         return ChatRoom::where('current_queue_id', '>', 0)->get();
     }
 
+    public function chatRoom(Request $request, $id) {
+        return ChatRoom::find($id);
+    }
     function chatRoomByCSR(Request $request, $csr_id)
     {
         return ChatRoom::where('user_id', $csr_id)

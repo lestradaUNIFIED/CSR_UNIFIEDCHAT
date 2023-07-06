@@ -41,6 +41,8 @@ Route::put('/queue/action/4/{id}', [CallQueueController::class, 'closeQueue']);
 
 
 Route::post('/chat-room', [ChatRoomController::class, 'createChatRoom']);
+Route::get('/chat-room/{id}', [ChatRoomController::class, 'chatRoom']);
+
 Route::post('/chat-room/action/1', [ChatRoomController::class, 'validateChatRoom']);
 Route::get('/chat-room/{customer_id}/{room_code}', [ChatRoomController::class, 'joinRoom']);
 Route::get('/chat-rooms/{csr_id}', [ChatRoomController::class, 'chatRoomByCSR']);

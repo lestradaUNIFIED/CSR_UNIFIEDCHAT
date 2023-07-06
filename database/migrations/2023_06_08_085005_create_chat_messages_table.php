@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('chat_messages', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('chat_room_id')->nullable()->default(null);
+            $table->enum('message_from', ['CUSTOMER', 'CSR'])->nullable()->default(null);
             $table->integer('sender_id')->nullable()->default(null);
             $table->integer('receiver_id')->nullable()->default(null);
             $table->text('message')->nullable()->default(null);
