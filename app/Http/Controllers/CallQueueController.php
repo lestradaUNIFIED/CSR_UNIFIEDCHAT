@@ -17,6 +17,57 @@ class CallQueueController extends Controller
     }
 
 
+    function queueList(Request $request){
+
+      
+            return CallQueue::join('web3.users_info as customer', 'call_queues.caller_id', '=', 'customer.user_id')
+            ->join('chat_rooms', 'chat_rooms.current_queue_id', '=', 'call_queues.id')
+            ->leftJoin('users', 'call_queues.csr_id', '=', 'users.id')
+            ->select(
+                    "call_queues.id",
+                    "customer.last_name as lastname",
+                    "customer.first_name as firstname",
+                    "call_queues.queue_status",
+                    "call_queues.date_onqueue",
+                    "date_ongoing",
+                    "date_end",
+                    "users.firstname as csr_firstname",
+                    "users.lastname as csr_lastname",
+                    "transaction",
+                    "call_queues.caller_id",
+                    "chat_rooms.id as room_id",
+                    "chat_rooms.room_code"
+            )
+            ->where("call_queues.queue_status", "WAITING")
+            ->get();
+        }
+
+        function videoCallQueueList(Request $request, $csr_id){
+            return CallQueue::join('web3.users_info as customer', 'call_queues.caller_id', '=', 'customer.user_id')
+            ->join('chat_rooms', 'chat_rooms.customer_id', '=', 'call_queues.caller_id')
+            ->leftJoin('users', 'call_queues.csr_id', '=', 'users.id')
+            ->select(
+                    "call_queues.id",
+                    "customer.last_name as lastname",
+                    "customer.first_name as firstname",
+                    "call_queues.queue_status",
+                    "call_queues.created_at as date_onqueue",
+                    "date_ongoing",
+                    "date_end",
+                    "users.firstname as csr_firstname",
+                    "users.lastname as csr_lastname",
+                    "transaction",
+                    "call_queues.caller_id",
+                    "chat_rooms.id as room_id",
+                    "chat_rooms.room_code",
+                    "call_queues.duration"
+            )
+            ->where("call_queues.transaction", "VIDEO CALL")
+            ->where("call_queues.csr_id", $csr_id)
+            ->orderBy('call_queues.id', 'DESC')
+            ->get();
+        }
+ 
 
     function updateQueue(Request $request, $id)
     {
