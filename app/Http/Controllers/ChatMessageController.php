@@ -41,7 +41,9 @@ class ChatMessageController extends Controller
                 "csr.full_name as csr",
                 "chat_messages.*"
             )
-            ->where('chat_room_id', $room_id)->get();
+            ->where('chat_room_id', $room_id)
+            ->orderBy("chat_messages.id", "ASC")
+            ->get();
 
 
     }

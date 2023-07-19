@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 
@@ -67,7 +66,7 @@ class AuthController extends Controller
                     'errors' => $validateUser->errors()
                 ], 401);
             }
-            $authAttempt = Auth::attempt($request->only(['userid', 'password']));
+            $authAttempt = auth()->attempt($request->only(['userid', 'password']));
             if (!$authAttempt) {
                 return response()->json([
                     'status' => false,
@@ -75,10 +74,10 @@ class AuthController extends Controller
                 ], 401);
             }
 
-            $user = User::where('userid', $request->userid)->firstOrFail();
+            //$user = User::where('userid', $request->userid)->firstOrFail();
 
-            $token = $user->createToken('auth_token')->plainTextToken;
-
+            $token = auth()->user()->createToken('auth_token')->plainTextToken;
+            $user  = auth()->user();
 
             //$user = User::where('userid', $request->userid)->firstOrFail();
 

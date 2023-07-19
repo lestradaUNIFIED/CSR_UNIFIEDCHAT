@@ -23,9 +23,14 @@ use App\Models\Caller;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+// Route::middleware('auth:api')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+
+
 //Route::apiResource('posts', PostController::class)->middleware('auth:sanctum');
 Route::post('/login', [AuthController::class, 'loginUser']);
 Route::get('/user/{id}', [AuthController::class, 'userInfo']);
@@ -33,7 +38,7 @@ Route::post('/user', [UserController::class, 'createUser']);
 Route::get('/user', [UserController::class, 'user']);
 Route::put('/user/{id}', [AuthController::class, 'updateUser']);
 
-
+//Route::middleware('auth:sanctum')->get('/user', [UserController::class, 'user'] );
 Route::get('/callqueues', [CallQueueController::class, 'queueList']);
 
 Route::put('/update-queue/{id}', [CallQueueController::class, 'updateQueue']);
