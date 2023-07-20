@@ -32,7 +32,11 @@ class UserTableSeeder extends Seeder
                         'full_name' => $firstname.' '.$lastname,
                         'email' => strtolower(mb_substr($firstname, 0, 1).'.'.$lastname).'@'.$faker->freeEmailDomain(),
                         'password' => strtolower($lastname),
-                        'userid' => strtolower(mb_substr($firstname, 0, 1).'.'.$lastname)
+                        'userid' => strtolower(mb_substr($firstname, 0, 1).'.'.$lastname),
+                        'created_by_userid' => 0,
+                        'updated_by_userid' => 0
+                        
+                        
                      ]);
             }
     

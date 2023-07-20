@@ -21,8 +21,14 @@ return new class extends Migration
             $table->string('userid')->unique();
             $table->string('email')->unique();
             $table->string('password');
+            $table->enum('user_role', ['1210', '5150'])->nullable()->default(null);
+            $table->integer('created_by_userid')->default(0);
+            $table->integer('updated_by_userid')->default(0);
             $table->rememberToken();
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate();
+            
+     
         });
     }
 
