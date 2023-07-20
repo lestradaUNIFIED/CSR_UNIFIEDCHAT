@@ -21,7 +21,7 @@ class CallQueueController extends Controller
 
       
             return CallQueue::join('web3.users_info as customer', 'call_queues.caller_id', '=', 'customer.user_id')
-            ->join('chat_rooms', 'chat_rooms.current_queue_id', '=', 'call_queues.id')
+            ->leftJoin('chat_rooms', 'chat_rooms.current_queue_id', '=', 'call_queues.id')
             ->leftJoin('users', 'call_queues.csr_id', '=', 'users.id')
             ->select(
                     "call_queues.id",
