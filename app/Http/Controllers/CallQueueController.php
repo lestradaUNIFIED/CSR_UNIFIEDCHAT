@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\CallQueue;
 
 use App\Models\ChatRoom;
+use DB;
 
 class CallQueueController extends Controller
 {
@@ -17,57 +18,59 @@ class CallQueueController extends Controller
     }
 
 
-    function queueList(Request $request){
+    function queueList(Request $request)
+    {
 
-      
-            return CallQueue::join('web3.users_info as customer', 'call_queues.caller_id', '=', 'customer.user_id')
+
+        return CallQueue::join('web3.users_info as customer', 'call_queues.caller_id', '=', 'customer.user_id')
             ->leftJoin('chat_rooms', 'chat_rooms.current_queue_id', '=', 'call_queues.id')
             ->leftJoin('users', 'call_queues.csr_id', '=', 'users.id')
             ->select(
-                    "call_queues.id",
-                    "customer.last_name as lastname",
-                    "customer.first_name as firstname",
-                    "call_queues.queue_status",
-                    "call_queues.date_onqueue",
-                    "date_ongoing",
-                    "date_end",
-                    "users.firstname as csr_firstname",
-                    "users.lastname as csr_lastname",
-                    "transaction",
-                    "call_queues.caller_id",
-                    "chat_rooms.id as room_id",
-                    "chat_rooms.room_code"
+                "call_queues.id",
+                "customer.last_name as lastname",
+                "customer.first_name as firstname",
+                "call_queues.queue_status",
+                DB::raw("DATE_ADD(call_queues.date_onqueue,interval 8 hour) as date_onqueue"),
+                "date_ongoing",
+                "date_end",
+                "users.firstname as csr_firstname",
+                "users.lastname as csr_lastname",
+                "transaction",
+                "call_queues.caller_id",
+                "chat_rooms.id as room_id",
+                "chat_rooms.room_code"
             )
             ->where("call_queues.queue_status", "WAITING")
             ->get();
-        }
+    }
 
-        function videoCallQueueList(Request $request, $csr_id){
-            return CallQueue::join('web3.users_info as customer', 'call_queues.caller_id', '=', 'customer.user_id')
+    function videoCallQueueList(Request $request, $csr_id)
+    {
+        return CallQueue::join('web3.users_info as customer', 'call_queues.caller_id', '=', 'customer.user_id')
             ->join('chat_rooms', 'chat_rooms.customer_id', '=', 'call_queues.caller_id')
             ->leftJoin('users', 'call_queues.csr_id', '=', 'users.id')
             ->select(
-                    "call_queues.id",
-                    "customer.last_name as lastname",
-                    "customer.first_name as firstname",
-                    "call_queues.queue_status",
-                    "call_queues.created_at as date_onqueue",
-                    "date_ongoing",
-                    "date_end",
-                    "users.firstname as csr_firstname",
-                    "users.lastname as csr_lastname",
-                    "transaction",
-                    "call_queues.caller_id",
-                    "chat_rooms.id as room_id",
-                    "chat_rooms.room_code",
-                    "call_queues.duration"
+                "call_queues.id",
+                "customer.last_name as lastname",
+                "customer.first_name as firstname",
+                "call_queues.queue_status",
+                "call_queues.created_at as date_onqueue",
+                "date_ongoing",
+                "date_end",
+                "users.firstname as csr_firstname",
+                "users.lastname as csr_lastname",
+                "transaction",
+                "call_queues.caller_id",
+                "chat_rooms.id as room_id",
+                "chat_rooms.room_code",
+                "call_queues.duration"
             )
             ->where("call_queues.transaction", "VIDEO CALL")
             ->where("call_queues.csr_id", $csr_id)
             ->orderBy('call_queues.id', 'DESC')
             ->get();
-        }
- 
+    }
+
 
     function updateQueue(Request $request, $id)
     {
@@ -92,9 +95,17 @@ class CallQueueController extends Controller
 
     function closeQueue(Request $request, $id)
     {
+
         $chatRoom = ChatRoom::where('id', $request->room_id)->firstOrFail();
-        $chatRoom->status_desc = 'DONE';
-        $chatRoom->status_code = '3';
+        if ($request->queue_status == 'PENDING') {
+            $chatRoom->status_desc = 'PENDING';
+            $chatRoom->status_code = '4';
+        } else {
+            $chatRoom->status_desc = 'DONE';
+            $chatRoom->status_code = '3';
+        }
+
+
         $chatRoom->save();
 
         $callQueue = CallQueue::findOrFail($id);

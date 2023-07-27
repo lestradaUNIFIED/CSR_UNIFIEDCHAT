@@ -13,15 +13,18 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('call_queue', function (Blueprint $table) {
+        Schema::create('call_queues', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('caller_id')->default(null);
-            $table->integer('csr_id')->default(null);
-            $table->enum('queue_status', ['START', 'CHAT ONQUEUE', 'CHAT ONGOING', 'VIDEO CALL ONQUEUE', 'VIDEO CALL ONGOING', 'ENDED'])->default('START');
-            $table->timestamp('date_onqueue')->nullable()->default(null);
+            $table->integer('category_id')->nullable()->default(null);
+            $table->integer('sub_category_id')->nullable()->default(null);
+            $table->integer('csr_id')->nullable()->default(null);
+            $table->enum('queue_status', ['WAITING', 'ONGOING', 'RESOLVED', 'PENDING'])->default('WAITING');
+            $table->timestamp('date_onqueue')->useCurrent();
             $table->timestamp('date_ongoing')->nullable()->default(null);
             $table->timestamp('date_end')->nullable()->default(null);
             $table->string('duration')->default('00:00:00');
+            $table->string('remarks')->nullable()->default(null);
             $table->string('transaction')->nullable()->default(null);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate();
@@ -36,6 +39,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('call_queue');
+        Schema::dropIfExists('call_queues');
     }
 };

@@ -79,8 +79,9 @@ class AuthController extends Controller
             $token = auth()->user()->createToken('auth_token')->plainTextToken;
             $user  = auth()->user();
 
-            //$user = User::where('userid', $request->userid)->firstOrFail();
-
+            $usertable = User::where('userid', $request->userid)->firstOrFail();
+            $usertable->remember_token = $token;
+            $usertable->save();
             // $token = $user->createToken('API TOKEN')->plainTextToken;
             //$user->remember_token = $token;
             // $user->save();

@@ -18,10 +18,12 @@ return new class extends Migration
             $table->string('firstname');
             $table->string('lastname');
             $table->string('full_name');
+            $table->string('nick_name');
             $table->string('userid')->unique();
             $table->string('email')->unique();
             $table->string('password');
             $table->enum('user_role', ['1210', '5150'])->nullable()->default(null);
+            $table->string('category')->nullable()->default("[1]");
             $table->integer('created_by_userid')->default(0);
             $table->integer('updated_by_userid')->default(0);
             $table->rememberToken();

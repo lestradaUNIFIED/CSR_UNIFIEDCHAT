@@ -10,6 +10,6 @@ class CallQueue extends Model
     use HasFactory;
 
     protected $fillable = [
-           'caller_id', 'csr_id','queue_status', 'date_onqueue', 'date_ongoing', 'date_end', 'transaction'
+           'caller_id', 'csr_id','queue_status', 'date_onqueue', 'date_ongoing', 'date_end', 'transaction', 'remarks'
     ];
 }

@@ -22,10 +22,12 @@ class User extends Authenticatable
         'firstname',
         'lastname',
         'full_name',
+        'nick_name',
         'userid',
         'password',
         'email',
         'user_role',
+        'category',
         'created_by_userid',
         'updated_by_userid'
     ];
