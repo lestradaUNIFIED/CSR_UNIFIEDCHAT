@@ -4,6 +4,11 @@ import App from "./app/app";
 import reportWebVitals from "./reportWebVitals";
 import { AppContextProvider } from "./context/AppContextProvider";
 import { BrowserRouter } from "react-router-dom";
+
+import.meta.glob([
+  './assets/images/**'
+])
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>

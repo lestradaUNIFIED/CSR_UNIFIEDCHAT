@@ -8,6 +8,9 @@ import { useEffect } from "react";
 import { ToastContainer } from "react-toastify";
 import { httpPrivate } from "../services/Api";
 import '../bootstrap'
+
+
+
 function App() {
   const { auth, session, setAuth } = useAuth();
   
