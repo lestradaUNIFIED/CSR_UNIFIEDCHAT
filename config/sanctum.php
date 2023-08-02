@@ -23,7 +23,7 @@ return [
 
     'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
         '%s%s',
-        '172.168.1.6, 172.168.1.6:8000',
+        'web.unifiedchat.ph',
         Sanctum::currentApplicationUrlWithPort()
     ))),
 
@@ -39,7 +39,7 @@ return [
     |
     */
 
-    'guard' => ['api'],
+    'guard' => ['api', 'web'],
 
     /*
     |--------------------------------------------------------------------------

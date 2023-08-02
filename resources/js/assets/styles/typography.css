@@ -1,0 +1,15 @@
+.upstxt{
+    font-size: 14px;
+}
+
+.ups-link{
+    font-size: 14px;
+    font-weight: 500;
+    color: #277DF1;
+    text-decoration: none;
+}
+
+.ups-link:hover{
+    color: #1167d7;
+}
+

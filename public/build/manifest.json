@@ -1,0 +1,34 @@
+{
+  "node_modules/web-vitals/dist/web-vitals.js": {
+    "file": "assets/web-vitals-60d3425a.js",
+    "isDynamicEntry": true,
+    "src": "node_modules/web-vitals/dist/web-vitals.js"
+  },
+  "resources/js/app.css": {
+    "file": "assets/app-c72135ed.css",
+    "src": "resources/js/app.css"
+  },
+  "resources/js/app.js": {
+    "assets": [
+      "assets/Unified_Logo-01-eb9d1ddf.png"
+    ],
+    "css": [
+      "assets/app-c72135ed.css"
+    ],
+    "dynamicImports": [
+      "node_modules/web-vitals/dist/web-vitals.js"
+    ],
+    "file": "assets/app-b25cf9e2.js",
+    "isEntry": true,
+    "src": "resources/js/app.js"
+  },
+  "resources/js/assets/images/icons/Unified_Logo-01.png": {
+    "file": "assets/Unified_Logo-01-eb9d1ddf.png",
+    "src": "resources/js/assets/images/icons/Unified_Logo-01.png"
+  },
+  "resources/sass/app.scss": {
+    "file": "assets/app-71455456.css",
+    "isEntry": true,
+    "src": "resources/sass/app.scss"
+  }
+}

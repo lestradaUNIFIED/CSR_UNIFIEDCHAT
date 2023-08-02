@@ -13,6 +13,20 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+
+$routes = ['/', 
+           '/chat', 
+           '/chat/dm/{room_code}/{customer_id}/{room_id}/{queue_id}/{room_status_code}', 
+           '/user', 
+           '/video-call', 
+           '/reports', 
+           '/reports/queue',
+           '/reports/users',
+           '/reports/clients'
+        ];
+
+foreach ($routes as $route => $value) {
+    Route::get($value, function () {
+        return view('app');
+    });
+}

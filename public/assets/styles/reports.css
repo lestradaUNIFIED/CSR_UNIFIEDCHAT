@@ -1,0 +1,21 @@
+.report-menu {
+  height: 30px;
+}
+.report-menu-header {
+  height: 40px;
+  background-color: rgb(51, 50, 50);
+  border-radius: 10px;
+}
+.report-menu-header-text {
+  font-weight: bold;
+  color: white;
+}
+
+.active-menu {
+  font-weight: bold;
+  height: 30px;
+}
+
+.icon {
+  align-self: self-end;
+}
