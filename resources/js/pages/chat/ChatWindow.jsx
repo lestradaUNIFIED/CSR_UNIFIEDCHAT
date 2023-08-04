@@ -39,7 +39,7 @@ import ChatWindowContext from "../../context/ChatWindowProvider";
 import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
 import DoDisturbAltRoundedIcon from "@mui/icons-material/DoDisturbAltRounded";
-
+import { httpPrivate } from "../../services/Api";
 import m from "moment";
 import Loader from "../../Components/Loader";
 function ChatWindow(props) {
@@ -79,6 +79,34 @@ function ChatWindow(props) {
       setSize({ height: 0 });
     }
   }, [images]);
+
+
+
+  useEffect(() => {
+    let ignore = false;
+      
+      async function getChat() {
+        setChatHistory([]);
+             if (!ignore) {
+          await httpPrivate
+            .get(`/chat-message/messages/${chatRoom.id}`)
+            .then((response) => {
+              // console.log(response.data);
+              setChatHistory(response.data);
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        }
+       
+      }
+      setImages([]);
+      getChat();
+   
+    return () => {
+      ignore = true;
+    };
+  }, [chatRoom]);
 
 
   useEffect(() => {
@@ -231,6 +259,7 @@ function ChatWindow(props) {
   };
   return (
     <Box>
+    
       <Slide direction="right" in>
         <div>
           {showEmojis && (
@@ -314,10 +343,10 @@ function ChatWindow(props) {
               </Grid>
             </Grid>
             <Grid id="window-chat-list" container>
-              <Grid item xs={12}>
+              <Grid item xs={12} sx={{height: "100%"}}>
                 <List
                   sx={{
-                    height: "15vh",
+                    height: "100%",
                     maxWidth: "100%",
                     overflow: "auto",
                     marginLeft: 1,

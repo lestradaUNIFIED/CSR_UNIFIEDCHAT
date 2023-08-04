@@ -71,6 +71,7 @@ import LaunchIcon from "@mui/icons-material/Launch";
 import ChatWindowContext from "../../context/ChatWindowProvider";
 import useRandomColorGenerator from "../../hooks/useRandomColorGenerator";
 import ChatWindow from "./ChatWindow";
+import ChatWindowHeadList from "./ChatWindowHeadsList";
 
 function ChatRoom() {
   // const messages = this.state.messages;
@@ -504,6 +505,7 @@ function ChatRoom() {
 
       {isChatRoomValid && (
         <Box>
+    <ChatWindowHeadList />
           <Dialog fullScreen={fullScreen} open={confirmDialogOpen} fullWidth>
             <DialogTitle>{"End Chat?"}</DialogTitle>
             <DialogContent>

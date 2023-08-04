@@ -68,32 +68,7 @@ export const ChatWindowProvider = ({ children }) => {
         deleteChatHead,
       }}
     >
-      {chatWindow.map((value, index) => {
-        return (
-       
-            <Draggable
-              key={value.chatRoom.id}
-              defaultPosition={{ x: 300, y: 100 }}
-            >
-              <div style={{zIndex: "999999"}}>
-              <ChatWindow
-                key={value.chatRoom.id}
-                chatInfo={value}
-                chatList={value.chatHistory}
-                windowControl
-                style={{
-                  height: "300px",
-                  width: "500px",
-                  position: "absolute",
-             
-                  display: "block",
-                }}
-              />
-              </div>
-            </Draggable>
-          
-        );
-      })}
+ 
       <div
         style={{
           position: "fixed",
