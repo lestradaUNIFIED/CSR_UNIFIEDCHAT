@@ -17,12 +17,14 @@ use Illuminate\Support\Facades\Route;
 $routes = ['/', 
            '/chat', 
            '/chat/dm/{room_code}/{customer_id}/{room_id}/{queue_id}/{room_status_code}', 
-           '/user', 
+           '/user',
+           '/user/{user_id}', 
            '/video-call', 
            '/reports', 
            '/reports/queue',
            '/reports/users',
-           '/reports/clients'
+           '/reports/clients',
+
         ];
 
 foreach ($routes as $route => $value) {

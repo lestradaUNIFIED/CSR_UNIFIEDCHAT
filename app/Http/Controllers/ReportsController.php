@@ -36,6 +36,7 @@ class ReportsController extends Controller
             ->where(DB::raw("TRIM(CONCAT(IFNULL(users.firstname, ''), ' ', IFNULL(users.lastname, '')))"), 'LIKE', '%' . $request->search_str . '%')
             ->orWhere(DB::raw("TRIM(CONCAT(IFNULL(callers.first_name, ''), ' ', IFNULL(callers.last_name, '')))"), 'LIKE', '%' . $request->search_str . '%')
             ->whereBetween('call_queues.' . $request->date_criteria, [$request->from_date, $request->to_date])
+            ->orderBy("call_queues.id", "DESC")
             ->get();
 
 

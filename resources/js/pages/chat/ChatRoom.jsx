@@ -70,6 +70,7 @@ import QueueIcon from "@mui/icons-material/Queue";
 import LaunchIcon from "@mui/icons-material/Launch";
 import ChatWindowContext from "../../context/ChatWindowProvider";
 import useRandomColorGenerator from "../../hooks/useRandomColorGenerator";
+import ChatWindow from "./ChatWindow";
 
 function ChatRoom() {
   // const messages = this.state.messages;
@@ -103,17 +104,12 @@ function ChatRoom() {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
-  const [uploadDetails, setUploadDetails] = useState({
-    file: null,
-    loaded: null,
-  });
   //console.log('Auth', auth);
   //const wsURL = `ws://172.168.1.212:8086/api/chat/${roomCode}/${user.full_name}`;
   //const wsURL = `ws://localhost:3002/api/chat/${roomCode}/${user.full_name}`;
 
   //const websocketURL = `wss://unifiedchatapi.azurewebsites.net/api/chat/${roomCode}/${user.full_name}`;
 
-  const [size, setSize] = useState({ height: 0, width: 200 });
   const isChatRoomValid = true;
   const [ws, setWs] = useState(null);
   const [recon, setRecon] = useState(false);
@@ -122,20 +118,14 @@ function ChatRoom() {
   const { setNotif } = useContext(NotificationContext);
   const wsRef = useRef(null);
   const { dialog, setDialog } = useDialog();
-  const [base64Array, setBase64Array] = useState([]);
   const [concernStatus, setConcernStatus] = useState("RESOLVED");
   const [remarks, setRemarks] = useState("");
   const { properCase } = useFunctions();
   const [selectedTab, setSelectedTab] = useState(+roomStatus - 1 || 1);
   const [roomByStatus, setRoomByStatus] = useState({});
   const { showChatWindow } = useContext(ChatWindowContext);
-
   const { generateColor } = useRandomColorGenerator();
-  useEffect(() => {
-    if (images.length === 0) {
-      setSize({ height: 0 });
-    }
-  }, [images]);
+  const [chatMessageReady, setChatMessageReady] = useState(false);
 
   useEffect(() => {
     let ignore = false;
@@ -227,8 +217,6 @@ function ChatRoom() {
           .get(API_URL)
           .then((response) => {
             //   console.log(response);
-          
-
 
             setChatRooms(response.data);
             setRoomByStatus(
@@ -273,7 +261,10 @@ function ChatRoom() {
         if (!ignore) {
           await httpPrivate
             .get(`/chat-message/messages/${roomId}`, {
-              params: { start: chatLength.start, length: chatLength.length },
+              params: {
+                start: chatLength.start,
+                length: chatLength.length,
+              },
             })
             .then((response) => {
               // console.log(response.data);
@@ -290,6 +281,7 @@ function ChatRoom() {
       getChatRoom();
       getChat();
       setSelectedTab(+roomStatus - 1);
+      setChatMessageReady(true);
     }
     return () => {
       ignore = true;
@@ -488,25 +480,6 @@ function ChatRoom() {
         console.log(err);
       });
   };
-  const handleImageDelete = (imgSelect) => {
-    setImages((prevImages) =>
-      [...prevImages].filter((img) => !(img === imgSelect))
-    );
-
-    const reader = new FileReader();
-    let rawData = new ArrayBuffer();
-    reader.loadend = () => {};
-    reader.onload = (e) => {
-      rawData = e.target.result;
-      setBase64Array((arr) =>
-        [...arr].filter((item) => !(item === ARRAY_BUFFER_TO_BASE64(rawData)))
-      );
-      //console.log('Raw Data', rawData);
-      //console.log('BASE 64', ARRAY_BUFFER_TO_BASE64(rawData))
-      // base64_array_buffer.push(ARRAY_BUFFER_TO_BASE64(rawData));
-    };
-    reader.readAsArrayBuffer(imgSelect);
-  };
 
   //console.log('Chat Rooms', chatRooms);
 
@@ -517,6 +490,7 @@ function ChatRoom() {
   const onTabChange = (e, val) => {
     navigate("/chat");
     setSelectedTab(val);
+    setChatMessageReady(false);
   };
 
   return (
@@ -530,31 +504,103 @@ function ChatRoom() {
 
       {isChatRoomValid && (
         <Box>
+          <Dialog fullScreen={fullScreen} open={confirmDialogOpen} fullWidth>
+            <DialogTitle>{"End Chat?"}</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Choose the status of the concern.
+              </DialogContentText>
+              <Grid container paddingTop={3}>
+                <FormControl fullWidth>
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    value={concernStatus}
+                    fullWidth
+                    label="Status"
+                    onChange={(e) => {
+                      setConcernStatus(e.target.value);
+                    }}
+                    size="small"
+                  >
+                    <MenuItem value="RESOLVED">
+                      <Chip
+                        icon={
+                          <CheckCircleOutlineIcon
+                            style={{
+                              color: "#007002",
+                            }}
+                          />
+                        }
+                        label="Resolved"
+                      />
+                    </MenuItem>
+                    <MenuItem value="PENDING">
+                      <Chip
+                        icon={
+                          <PauseCircleOutlineIcon
+                            style={{
+                              color: "#f78e05",
+                            }}
+                          />
+                        }
+                        label="Pending"
+                      />
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid container paddingTop={2}>
+                <FormControl fullWidth>
+                  <TextField
+                    size="small"
+                    fullWidth
+                    label="Remarks"
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    multiline
+                    value={remarks}
+                    onChange={(e) => {
+                      setRemarks(e.currentTarget.value);
+                    }}
+                  />
+                </FormControl>
+              </Grid>
+            </DialogContent>
+            <DialogActions>
+              <Button autoFocus onClick={closeDialog}>
+                CANCEL
+              </Button>
+              <Button autoFocus onClick={confirmEndChat}>
+                AGREE
+              </Button>
+            </DialogActions>
+          </Dialog>
+
           <Divider />
 
           <Tabs value={selectedTab} onChange={onTabChange}>
             <Tab
-              icon={
-                <AccessTimeFilledRoundedIcon style={{ color: "#0a9103" }} />
-              }
+              icon={<AccessTimeFilledRoundedIcon color="error" />}
               iconPosition="start"
               value={1}
               label={`ONGOING (${roomByStatus["1"]?.length || 0})`}
             />
             <Tab
-              icon={<PauseCircleFilledIcon style={{ color: "#eb7005" }} />}
+              icon={<PauseCircleFilledIcon color="warning" />}
               iconPosition="start"
               value={3}
               label={`PENDING (${roomByStatus["3"]?.length || 0})`}
             />
             <Tab
-              icon={<CheckCircleRoundedIcon style={{ color: "#c70d00" }} />}
+              icon={<CheckCircleRoundedIcon color="success" />}
               iconPosition="start"
               value={2}
               label={`DONE (${roomByStatus["2"]?.length || 0})`}
             />
             <Tab
-              icon={<QueueIcon style={{ color: "#eb7005" }} />}
+              icon={<QueueIcon color="info" />}
               iconPosition="start"
               value={0}
               label={`WAITING (${roomByStatus["0"]?.length || 0})`}
@@ -574,7 +620,8 @@ function ChatRoom() {
                           borderRightWidth: 1,
                           borderRight: 1,
                           borderRightColor: "#999999",
-                          maxHeight: "95vh",
+                          height: "70vh",
+                          maxHeight: "70vh",
                           overflow: "auto",
                           fontSize: "smaller",
                           marginRight: 0,
@@ -594,7 +641,6 @@ function ChatRoom() {
                             </li>
 
                             {rooms.map((value, index) => {
-
                               const bgColor = generateColor();
                               const nameArray = (value.chat_name || " ").split(
                                 " "
@@ -615,95 +661,134 @@ function ChatRoom() {
                                     }
                                     key={`${index}${status}`}
                                   >
-                                    <ListItemButton
-                                      component={Link}
-                                      onClick={async () => {
-                                        connectWebSocket(chatRoom.status_code);
-                                      }}
-                                      to={`/chat/dm/${value.room_code}/${value.customer_id}/${value.id}/${value.current_queue_id}/${value.status_code}`}
-                                      sx={{ height: "50px" }}
-                                      key={`ListItemButton${index}`}
-                                    >
-                                      <ListItemAvatar
-                                        key={`ListItemAvatar${index}`}
+                                    <div>
+                                      <ListItemButton
+                                        component={Link}
+                                        onClick={async () => {
+                                          connectWebSocket(
+                                            chatRoom.status_code
+                                          );
+                                        }}
+                                        to={`/chat/dm/${value.room_code}/${value.customer_id}/${value.id}/${value.current_queue_id}/${value.status_code}`}
+                                        sx={{
+                                          height: "50px",
+                                        }}
+                                        key={`ListItemButton${index}`}
                                       >
-                                        <Avatar
-                                          key={`Avatar${index}`}
-                                          sx={{
-                                            height: "30px",
-                                            width: "30px",
-                                            backgroundColor: "#" + bgColor,
-                                          }}
+                                        <ListItemAvatar
+                                          key={`ListItemAvatar${index}`}
                                         >
-                                          <span
-                                            style={{
-                                              fontSize: "small",
-                                              fontWeight: "bold",
+                                          <Avatar
+                                            key={`Avatar${index}`}
+                                            sx={{
+                                              height: "30px",
+                                              width: "30px",
+                                              backgroundColor: "#0023bf",
                                             }}
                                           >
-                                            {`${nameArray[0].charAt(
-                                              0
-                                            )}${nameArray[
-                                              nameArray.length - 1
-                                            ].charAt(0)}`}
+                                            <span
+                                              style={{
+                                                fontSize: "small",
+                                                fontWeight: "bold",
+                                              }}
+                                            >
+                                              {`${nameArray[0].charAt(
+                                                0
+                                              )}${nameArray[
+                                                nameArray.length - 1
+                                              ].charAt(0)}`}
+                                            </span>
+                                          </Avatar>
+                                          <span
+                                            style={{
+                                              position: "relative",
+                                              top: "-10px",
+                                              right: "-18px",
+                                            }}
+                                          >
+                                            <Tooltip title="Ongoing">
+                                              <AccessTimeFilledRoundedIcon
+                                                style={{
+                                                  display:
+                                                    value.status_code === "2"
+                                                      ? "flex"
+                                                      : "none",
+                                                  fontSize: "small",
+                                                }}
+                                                color="error"
+                                              />
+                                            </Tooltip>
+                                            <Tooltip title="Pending">
+                                              <PauseCircleFilledIcon
+                                                style={{
+                                                  display:
+                                                    value.status_code === "4"
+                                                      ? "flex"
+                                                      : "none",
+                                                  fontSize: "small",
+                                                }}
+                                                color="warning"
+                                              />
+                                            </Tooltip>
+                                            <Tooltip title="Resolved">
+                                              <CheckCircleRoundedIcon
+                                                style={{
+                                                  display:
+                                                    value.status_code === "3"
+                                                      ? "flex"
+                                                      : "none",
+                                                  fontSize: "small",
+                                                }}
+                                                color="success"
+                                              />
+                                            </Tooltip>
                                           </span>
-                                        </Avatar>
-                                        <span
-                                          style={{
-                                            position: "relative",
-                                            top: "-10px",
-                                            right: "-18px",
-                                          }}
-                                        >
-                                          <Tooltip title="Ongoing">
-                                            <AccessTimeFilledRoundedIcon
-                                              style={{
-                                                display:
-                                                  value.status_code === "2"
-                                                    ? "flex"
-                                                    : "none",
-                                                fontSize: "small",
-                                                color: "#0a9103",
-                                              }}
-                                            />
-                                          </Tooltip>
-                                          <Tooltip title="Pending">
-                                            <PauseCircleFilledIcon
-                                              style={{
-                                                display:
-                                                  value.status_code === "4"
-                                                    ? "flex"
-                                                    : "none",
-                                                fontSize: "small",
-                                                color: "#eb7005",
-                                              }}
-                                            />
-                                          </Tooltip>
-                                          <Tooltip title="Resolved">
-                                            <CheckCircleRoundedIcon
-                                              style={{
-                                                display:
-                                                  value.status_code === "3"
-                                                    ? "flex"
-                                                    : "none",
-                                                fontSize: "small",
-                                                color: "#c70d00",
-                                              }}
-                                            />
-                                          </Tooltip>
-                                        </span>
-                                      </ListItemAvatar>
+                                        </ListItemAvatar>
 
-                                      <div>
-                                        <div className="chat-room-header">
-                                          {displayName}
+                                        <div>
+                                          <div className="chat-room-header">
+                                            {displayName}
+                                          </div>
+                                          <div className="chat-message-preview">
+                                            {value.last_message.substring(
+                                              0,
+                                              20
+                                            ) + "..."}
+                                          </div>
                                         </div>
-                                        <div className="chat-message-preview">
-                                          {value.last_message.substring(0, 20) +
-                                            "..."}
-                                        </div>
-                                      </div>
-                                    </ListItemButton>
+                                      </ListItemButton>
+                                    </div>
+                                    <div
+                                      style={{
+                                        position: "relative",
+                                        top: "-90%",
+                                        textAlign: "end",
+                                        width: "15%",
+                                        right: "-85%",
+                                        display: "flex"
+                                      }}
+                                    >
+                                      <Tooltip title="End Chat">
+                                        <IconButton sx={{padding: 0, paddingRight:0.3, display: value.status_code !== "3" ? "flex" : "none"}}>
+                                          <DoDisturbAltRoundedIcon
+                                            style={{
+                                              fontSize: "small",
+                                            }}
+                                            color="error"
+                                          />
+                                        </IconButton>
+                                      </Tooltip>
+                                      <Tooltip title="Pop-out Chat" >
+                                        <IconButton sx={{padding: 0, display: "flex"}} onClick={() => { showChatWindow({chatRoom : value, chatHistory: []}) }}>
+                                        <LaunchIcon
+                                        style={{
+                                          fontSize: "small",
+                                        }}
+                                      />
+
+                                        </IconButton>
+                                      </Tooltip>
+                                    </div>
                                   </li>
                                   <Divider />
                                 </React.Fragment>
@@ -713,468 +798,35 @@ function ChatRoom() {
                         </React.Fragment>
                       </Grid>
                       <Grid item xs={10}>
-                        {roomId && (
-                          <Grid container>
-                            <Grid item xs={11}>
-                              <div className="convo-header">
-                                <Avatar
-                                  sx={{
-                                    display: "flex",
-                                    fontSize: "smaller",
-                                  }}
-                                >
-                                  {`${chatRoom?.chat_name?.charAt(
-                                    0
-                                  )}${chatRoom?.chat_name?.charAt(
-                                    chatRoom?.chat_name?.lastIndexOf(" ") + 1
-                                  )}`}
-                                </Avatar>
-                                <span className="text">
-                                  {chatRoom.chat_name}
-                                </span>
-                              </div>
-                            </Grid>
-                            <Grid
-                              item
-                              xs={1}
-                              className="convo-header"
-                              sx={{ textAlign: "end" }}
-                            >
-                              <span className="icon">
-                                <Tooltip title="Pop-out Chat">
-                                  <IconButton
-                                    onClick={() => {
-                                      showChatWindow({
-                                        chatHistory,
-                                        chatRoom,
-                                      });
-                                    }}
-                                  >
-                                    <LaunchIcon style={{ fontSize: "large" }} />
-                                  </IconButton>
-                                </Tooltip>
-                              </span>
-                            </Grid>
-                          </Grid>
-                        )}
-
                         <Grid container>
                           <Grid
                             item
                             xs={12}
                             sx={{
-                              borderBottomWidth: 1,
-                              borderBottom: 1,
-                              borderBottomColor: "#999999",
+                              borderBottomWidth: 0,
+                              borderBottom: 0,
+                              borderBottomColsor: "#999999",
                             }}
                           >
-                            <Box
-                              className="chat-box"
-                              ref={listBoxEl}
-                              id="chatbox"
-                            >
-                              {roomCode && (
-                                <InfiniteScroll dataLength={20} hasMore={true}>
-                                  <ul
-                                    id="messages"
-                                    className="Messages-List"
-                                    key={`chatlist-${status}`}
-                                    style={{ paddingRight: 10 }}
-                                  >
-                                    <LoaderSmall loading={loading1} />
-
-                                    {Object.entries(
-                                      chatHistory.reduce((chat, row) => {
-                                        const { queue_info } = row;
-                                        if (!chat[queue_info]) {
-                                          chat[queue_info] = [];
-                                        }
-                                        chat[queue_info].push(row);
-
-                                        return chat;
-                                      }, {})
-                                    ).map(([queue, chats]) => {
-                                      const queue_info = JSON.parse(
-                                        queue ||
-                                          `{"queue_status":"ONGOING", "queue_id" : ${queueId}}`
-                                      );
-                                      return (
-                                        <React.Fragment key={queue}>
-                                          {chats.map((chat, index) => {
-                                            const messageFromMe =
-                                              chat.message_from === "CSR";
-                                            const sender = messageFromMe
-                                              ? chat.csr
-                                              : chat.customer;
-                                            return (
-                                              <React.Fragment
-                                                key={`lisMessage${index}${queue}`}
-                                              >
-                                                <li
-                                                  className={
-                                                    messageFromMe
-                                                      ? "Messages-message currentMember"
-                                                      : "Messages-message"
-                                                  }
-                                                >
-                                                  <div className="Message-content">
-                                                    <div className="avatar">
-                                                      {!messageFromMe && (
-                                                        <AccountCircleIcon
-                                                          sx={{
-                                                            height: "25px",
-                                                            width: "25px",
-                                                          }}
-                                                          style={{
-                                                            color: "#1178f5",
-                                                          }}
-                                                        />
-                                                      )}
-                                                      {messageFromMe && (
-                                                        <SupportAgentSharpIcon
-                                                          sx={{
-                                                            height: "25px",
-                                                            width: "25px",
-                                                          }}
-                                                          style={{
-                                                            color: "#fc821e",
-                                                          }}
-                                                        />
-                                                      )}
-                                                    </div>
-
-                                                    <Slide
-                                                      direction="left"
-                                                      in
-                                                      mountOnEnter
-                                                    >
-                                                      <div className="text">
-                                                        {chat.message}
-                                                        {/*
-                                              <img
-                                                src={`data:image/jpeg;base64,${chat.message}`}
-                                              />
-                                              */}
-
-                                                        <div className="timestamp">
-                                                          {m(
-                                                            chat.created_at
-                                                          ).format(
-                                                            "YYYY-MM-DD HH:mm:ss"
-                                                          )}
-                                                        </div>
-                                                      </div>
-                                                    </Slide>
-                                                  </div>
-                                                </li>
-                                              </React.Fragment>
-                                            );
-                                          })}
-                                          <div
-                                            style={{
-                                              paddingBottom: 30,
-                                              marginTop: 30,
-                                              fontWeight: "bold",
-                                              display:
-                                                queue_info.queue_status ===
-                                                "ONGOING"
-                                                  ? "none"
-                                                  : "block",
-                                            }}
-                                          >
-                                            <Divider light={false}>
-                                              {queue_info.queue_status}
-                                            </Divider>
-                                          </div>
-                                        </React.Fragment>
-                                      );
-                                    })}
-                                  </ul>
-                                </InfiniteScroll>
-                              )}
-                              {roomCode === undefined && (
-                                <Box
-                                  sx={{
-                                    position: "relative",
-                                    top: "48%",
-                                    left: "40%",
-                                    width: "400px",
-                                  }}
-                                >
-                                  Select a Convo
-                                </Box>
-                              )}
-                            </Box>
-                          </Grid>
-                        </Grid>
-                        <Grid container>
-                          <Grid item xs={12}>
-                            {roomCode && !chatEnded && (
+                            {roomCode === undefined && (
                               <Box
-                                component={"form"}
-                                onSubmit={onSubmit}
-                                className="chat-field"
-                                encType="multipart/form-data"
+                                sx={{
+                                  position: "relative",
+                                  top: "48%",
+                                  left: "40%",
+                                  width: "400px",
+                                }}
                               >
-                                <Dialog
-                                  fullScreen={fullScreen}
-                                  open={confirmDialogOpen}
-                                  fullWidth
-                                >
-                                  <DialogTitle>{"End Chat?"}</DialogTitle>
-                                  <DialogContent>
-                                    <DialogContentText>
-                                      Choose the status of the concern.
-                                    </DialogContentText>
-                                    <Grid container paddingTop={3}>
-                                      <FormControl fullWidth>
-                                        <InputLabel>Status</InputLabel>
-                                        <Select
-                                          value={concernStatus}
-                                          fullWidth
-                                          label="Status"
-                                          onChange={(e) => {
-                                            setConcernStatus(e.target.value);
-                                          }}
-                                          size="small"
-                                        >
-                                          <MenuItem value="RESOLVED">
-                                            <Chip
-                                              icon={
-                                                <CheckCircleOutlineIcon
-                                                  style={{ color: "#007002" }}
-                                                />
-                                              }
-                                              label="Resolved"
-                                            />
-                                          </MenuItem>
-                                          <MenuItem value="PENDING">
-                                            <Chip
-                                              icon={
-                                                <PauseCircleOutlineIcon
-                                                  style={{ color: "#f78e05" }}
-                                                />
-                                              }
-                                              label="Pending"
-                                            />
-                                          </MenuItem>
-                                        </Select>
-                                      </FormControl>
-                                    </Grid>
-
-                                    <Grid container paddingTop={2}>
-                                      <FormControl fullWidth>
-                                        <TextField
-                                          size="small"
-                                          fullWidth
-                                          label="Remarks"
-                                          InputLabelProps={{ shrink: true }}
-                                          multiline
-                                          value={remarks}
-                                          onChange={(e) => {
-                                            setRemarks(e.currentTarget.value);
-                                          }}
-                                        />
-                                      </FormControl>
-                                    </Grid>
-                                  </DialogContent>
-                                  <DialogActions>
-                                    <Button autoFocus onClick={closeDialog}>
-                                      CANCEL
-                                    </Button>
-                                    <Button autoFocus onClick={confirmEndChat}>
-                                      AGREE
-                                    </Button>
-                                  </DialogActions>
-                                </Dialog>
-
-                                <Grid container className="chat-form">
-                                  <Grid item xs={12} paddingRight={3}>
-                                    <TextField
-                                      type="text"
-                                      onChange={(e) => {
-                                        onChange(e);
-                                      }}
-                                      value={state.message}
-                                      sx={{
-                                        marginLeft: 2,
-                                        paddingTop: 0.5,
-                                        paddingLeft: 1.5,
-                                        paddingRight: 1.5,
-                                        borderRadius: 5,
-                                        border: 1,
-                                        fontSize: "small",
-                                        borderColor: "#9e9e9e",
-                                      }}
-                                      fullWidth
-                                      InputProps={{
-                                        endAdornment: (
-                                          <InputAdornment position="end">
-                                            <Stack direction={"row"} gap={0}>
-                                              <Tooltip title="Emoji">
-                                                <IconButton
-                                                  onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setShowEmojis(!showEmojis);
-                                                  }}
-                                                  sx={{ padding: 0.3 }}
-                                                >
-                                                  <EmojiEmotionsIcon
-                                                    fontSize="small"
-                                                    style={{ color: "#0747f5" }}
-                                                  />
-                                                </IconButton>
-                                              </Tooltip>
-                                              <Tooltip title="Send">
-                                                <IconButton
-                                                  type="submit"
-                                                  sx={{ padding: 0.3 }}
-                                                >
-                                                  <SendIcon
-                                                    style={{ color: "#0747f5" }}
-                                                    fontSize="small"
-                                                  />
-                                                </IconButton>
-                                              </Tooltip>
-
-                                              <Tooltip title="Photo">
-                                                <IconButton
-                                                  component="label"
-                                                  sx={{ padding: 0.3 }}
-                                                >
-                                                  <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    style={{ display: "none" }}
-                                                    onChange={handleFileChange}
-                                                    name="file"
-                                                    multiple
-                                                  />
-                                                  <PhotoIcon
-                                                    style={{ color: "#0747f5" }}
-                                                    fontSize="small"
-                                                  />
-                                                </IconButton>
-                                              </Tooltip>
-
-                                              <Tooltip title="End Chat">
-                                                <IconButton
-                                                  onClick={() => {
-                                                    setConfirmDialogOpen(true);
-                                                  }}
-                                                  sx={{ padding: 0.3 }}
-                                                >
-                                                  <DoDisturbAltRoundedIcon
-                                                    fontSize="small"
-                                                    style={{ color: "#fc0303" }}
-                                                  />
-                                                </IconButton>
-                                              </Tooltip>
-                                            </Stack>
-                                          </InputAdornment>
-                                        ),
-                                        disableUnderline: true,
-                                        style: {
-                                          textAlign: "center",
-                                        },
-                                        startAdornment: (
-                                          <Oval
-                                            height={20}
-                                            width={20}
-                                            color="#2b2b2b"
-                                            wrapperStyle={{}}
-                                            wrapperClass=""
-                                            visible={!chatActive}
-                                            ariaLabel="oval-loading"
-                                            secondaryColor="#2b2b2b"
-                                            strokeWidth={6}
-                                            strokeWidthSecondary={6}
-                                          />
-                                        ),
-                                      }}
-                                      autoFocus={true}
-                                      size="small"
-                                      variant="standard"
-                                      disabled={!chatActive}
-                                    />
-                                  </Grid>
-
-                                  <Grid item xs={6}>
-                                    {showEmojis && (
-                                      <div
-                                        style={{
-                                          position: "absolute",
-                                          top: "320px",
-                                          right: "180px",
-                                          maxWidth: "320px",
-                                          borderRadius: "20px",
-                                          backgroundColor: "red",
-                                          padding: 0,
-                                        }}
-                                      >
-                                        <Picker
-                                          data={data}
-                                          onEmojiSelect={addEmoji}
-                                          theme="dark"
-                                          onClickOutside={() => {
-                                            setShowEmojis(false);
-                                          }}
-                                        />
-                                      </div>
-                                    )}
-                                  </Grid>
-                                </Grid>
+                                Select a Convo
                               </Box>
                             )}
-
-                            <div
-                              className="chat-ended"
-                              style={{
-                                display: chatEnded ? "block" : "none",
-                                margin: 10,
-                              }}
-                            >
-                              --- {`CHAT ${chatRoom.status_desc}`} ---
-                            </div>
-                          </Grid>
-                        </Grid>
-                        <Grid container>
-                          <Grid item xs={12}>
-                            <ImageList
-                              cols={10}
-                              sx={{ padding: 0, height: size.height }}
-                              gap={5}
-                            >
-                              {images.map((img, index) => {
-                                return (
-                                  <ImageListItem key={index} sx={{ border: 1 }}>
-                                    <img
-                                      src={URL.createObjectURL(img)}
-                                      style={{ width: 105, height: 30 }}
-                                    />
-
-                                    <ImageListItemBar
-                                      position="top"
-                                      actionIcon={
-                                        <Tooltip title="Remove">
-                                          <IconButton
-                                            onClick={() => {
-                                              handleImageDelete(img);
-                                            }}
-                                          >
-                                            <CloseIcon
-                                              fontSize="small"
-                                              style={{ color: "#fca103" }}
-                                            />
-                                          </IconButton>
-                                        </Tooltip>
-                                      }
-                                      actionPosition="right"
-                                    />
-                                  </ImageListItem>
-                                );
-                              })}
-                            </ImageList>
+                            {chatMessageReady && chatHistory.length > 0 && (
+                              <ChatWindow
+                                chatInfo={{ chatRoom, chatHistory }}
+                                chatList={chatHistory}
+                                key={roomId}
+                              />
+                            )}
                           </Grid>
                         </Grid>
                       </Grid>

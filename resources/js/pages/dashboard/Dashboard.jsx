@@ -24,6 +24,8 @@ import WebsocketContext from "../../context/WebsocketProvider";
 import QueueContext from "../../context/QueueProvider";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import useMomentLocale from "../../hooks/useMomentLocale";
+import useCategoryAccess from "../../hooks/useCategoryAccess";
+
 function Dashboard() {
   const { queueRows, setQueueRows, queueActive } = useContext(QueueContext);
   const { auth } = useAuth();
@@ -32,6 +34,7 @@ function Dashboard() {
   const [state, setState] = useState({ data: {} });
   const [alertLevel, setAlertLevel] = useState(0);
   const { momentLocal, toPHTime } = useMomentLocale();
+  const {ALLOWED_CATEGORY} = useCategoryAccess();
   //console.log(session);
 
   const user = auth?.token?.user;
@@ -41,21 +44,22 @@ function Dashboard() {
   //const [ongoingWs, setOngoingWs] = useState(websocket("chat/ongoing"));
 
   useEffect(() => {
+  
     async function loadData() {
       const data = await httpPrivate.get("/callqueues");
-      setQueueRows(data.data);
+      setQueueRows(data.data.filter((row) => ALLOWED_CATEGORY.find((val) => val === '*' ? true : (+val === +row.category_id))));
     }
 
     let ignore = false;
 
-    if (!ignore) {
+    if (!ignore && ALLOWED_CATEGORY.length > 0) {
       loadData();
     }
 
     return () => {
       ignore = true;
     };
-  }, [state]);
+  }, [state, ALLOWED_CATEGORY]);
 
   useEffect(() => {
     let ignore = false;
@@ -238,7 +242,7 @@ function Dashboard() {
         updated_queue.room_code = updated_chat_room.room_code;
         updated_queue.room_id = updated_chat_room.id; 
         setState({ data: updated_queue });
-        
+       
   
 
         
@@ -337,7 +341,7 @@ function Dashboard() {
           pageSizeOptions={[10, 25, 50]}
           apiRef={apiRef}
           density="compact"
-          sx={{ height: "66vh" }}
+          sx={{ height: "66vh", fontSize: "9pt" }}
         
         />
       </Box>

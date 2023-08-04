@@ -25,6 +25,8 @@ class CallQueueController extends Controller
         return CallQueue::join('web3.users_info as customer', 'call_queues.caller_id', '=', 'customer.user_id')
             ->leftJoin('chat_rooms', 'chat_rooms.current_queue_id', '=', 'call_queues.id')
             ->leftJoin('users', 'call_queues.csr_id', '=', 'users.id')
+            ->leftJoin('categories as main_cat', 'main_cat.id', '=', 'call_queues.category_id')
+            ->leftJoin('sub_categories as sub_cat', 'sub_cat.id', '=', 'call_queues.sub_category_id')
             ->select(
                 "call_queues.id",
                 "customer.last_name as lastname",
@@ -38,7 +40,11 @@ class CallQueueController extends Controller
                 "transaction",
                 "call_queues.caller_id",
                 "chat_rooms.id as room_id",
-                "chat_rooms.room_code"
+                "chat_rooms.room_code",
+                "call_queues.category_id",
+                "call_queues.sub_category_id",
+                "main_cat.category as category",
+                "sub_cat.category as sub_category"
             )
             ->where("call_queues.queue_status", "WAITING")
             ->get();
@@ -63,7 +69,8 @@ class CallQueueController extends Controller
                 "call_queues.caller_id",
                 "chat_rooms.id as room_id",
                 "chat_rooms.room_code",
-                "call_queues.duration"
+                "call_queues.duration",
+                "call_queues.remarks"
             )
             ->where("call_queues.transaction", "VIDEO CALL")
             ->where("call_queues.csr_id", $csr_id)

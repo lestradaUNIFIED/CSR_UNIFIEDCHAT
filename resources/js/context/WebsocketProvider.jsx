@@ -3,8 +3,9 @@ import websocket from "../services/Ws";
 import QueueContext from "./QueueProvider";
 import NotificationContext from "./DesktopNotificationProvider";
 import useToastify from "../hooks/useToastify";
-import useMomentLocale from "../hooks/useMomentLocale";
 import m from "moment";
+import useAuth from "../hooks/useAuth";
+import useCategoryAccess from "../hooks/useCategoryAccess";
 const WebsocketContext = createContext("");
 
 export const WebsocketProvider = ({ children }) => {
@@ -16,13 +17,17 @@ export const WebsocketProvider = ({ children }) => {
     severity: "info",
     message: "",
   });
+  const { auth } = useAuth();
+  const user = auth?.token?.user;
   const { setNotif } = useContext(NotificationContext);
   const { createToast } = useToastify();
-  const { toPHTime } = useMomentLocale();
+  const { ALLOWED_CATEGORY } = useCategoryAccess();
+
+
   useEffect(() => {
     let ignore = false;
 
-    if (!wsRef.current && !recon) {
+    if (!wsRef.current && !recon && auth?.token && ALLOWED_CATEGORY.length > 0) {
       wsRef.current = websocket("chat/queue");
 
       console.log("Live Queue Status", wsRef.current.readyState);
@@ -32,6 +37,8 @@ export const WebsocketProvider = ({ children }) => {
           setQueueActive(true);
           setRecon(true);
           console.log("Queueing Active", m().format("YYYY-MM-DD HH:mm:ss"));
+           
+     //     console.log(ALLOWED_CATEGORY)
         }
       };
       wsRef.current.onmessage = (e) => {
@@ -40,6 +47,7 @@ export const WebsocketProvider = ({ children }) => {
 
         dataTxt.date_onqueue = m(dataTxt.date_onqueue).format("YYY-MM-DD HH:mm:ss");
         // console.log(e);
+       
         if (dataTxt.remove) {
           setSbOpen({
             open: true,
@@ -57,17 +65,26 @@ export const WebsocketProvider = ({ children }) => {
           );
         } else {
           if (dataTxt.queue_status === "WAITING") {
-            setSbOpen({
-              open: true,
-              severity: "info",
-              message: `${dataTxt.firstname} ${dataTxt.lastname} was added to the queue. `,
-            });
-            setQueueRows((prevRows) => [...prevRows, dataTxt]);
+         
+      //        console.log(ALLOWED_CATEGORY);
+              if (ALLOWED_CATEGORY.find((cat) => cat === '*' ? true : +cat === dataTxt.category_id)) {
+                setSbOpen({
+                  open: true,
+                  severity: "info",
+                  message: `${dataTxt.firstname} ${dataTxt.lastname} was added to the queue. `,
+                });
+                setQueueRows((prevRows) => [...prevRows, dataTxt]);
+    
+                createToast({
+                  type: "info",
+                  message: `${dataTxt.firstname} ${dataTxt.lastname} was added to the queue. `,
+                });
+  
+              }
+            
+  
+            
 
-            createToast({
-              type: "info",
-              message: `${dataTxt.firstname} ${dataTxt.lastname} was added to the queue. `,
-            });
           }
         }
 
@@ -92,7 +109,7 @@ export const WebsocketProvider = ({ children }) => {
     return () => {
       ignore = true;
     };
-  }, [wsRef, recon]);
+  }, [wsRef, recon, auth?.token, ALLOWED_CATEGORY]);
 
   return (
     <WebsocketContext.Provider value={{ wsRef, sbOpen, setSbOpen }}>

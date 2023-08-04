@@ -67,7 +67,7 @@ const Register = ({ userInfo }) => {
         async function loadUser() {
           await httpPrivate.get(`/user/${userId}`).then((response) => {
             const userSelected = response.data.user;
-            console.log(response.data.user);
+           // console.log(response.data.user);
             //console.log(document.getElementById('formRegister'));
             setLastName(userSelected.lastname);
             setFirstName(userSelected.firstname);
@@ -476,6 +476,7 @@ const Register = ({ userInfo }) => {
               <InputLabel>Categories</InputLabel>
 
               <Select
+                disabled={user?.user_role !== ROLES.Admin}
                 fullWidth
                 multiple
                 label="Categories"
@@ -498,12 +499,17 @@ const Register = ({ userInfo }) => {
                             deleteIcon={
                               <CancelRoundedIcon
                                 onMouseDown={(event) => event.stopPropagation()}
-                              />
+                              /> 
                             }
                             onDelete={() => {
+                              
+                              user?.user_role === ROLES.Admin ?
                               setCategory(
                                 category.filter((c) => !(+c === +value))
-                              );
+                              )
+                              :
+                              ''
+
                             }}
                             size="small"
                           />

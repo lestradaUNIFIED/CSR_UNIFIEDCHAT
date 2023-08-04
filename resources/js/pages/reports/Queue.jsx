@@ -16,9 +16,11 @@ import { DateTimePicker } from "@mui/x-date-pickers";
 import SearchIcon from "@mui/icons-material/Search";
 import m from "moment";
 import useAuth from "../../hooks/useAuth";
+import useMomentLocale from "../../hooks/useMomentLocale";
 const QueueReport = () => {
   const [rows, setRows] = useState([]);
   const [dateCriteria, setDateCriteria] = useState("created_at");
+  const { toPHTime, getDurationStr } = useMomentLocale();
   const { auth } = useAuth();
   const apiRef = useGridApiRef();
 
@@ -35,14 +37,29 @@ const QueueReport = () => {
       headerName: "CSR Name",
       width: 200,
       valueGetter: (params) =>
-        `${params.row.csr_firstname || ""} ${params.row.csr_lastname || ""} `,
+        `${params.row.csr_firstname || ""} ${params.row.csr_lastname || ""
+        } `,
     },
-    { field: "category", headerName: "Category", flex: 1 },
+    { field: "category", headerName: "Category", width: 200 },
     { field: "sub_category", headerName: "Sub Category", width: 200 },
     { field: "queue_status", headerName: "Status", width: 200 },
-    { field: "date_onqueue", headerName: "Date Queued", width: 200 },
+    {
+      field: "date_onqueue",
+      headerName: "Date Queued",
+      width: 200,
+      valueGetter: (params) =>
+        m(toPHTime(params.row.date_onqueue)).format(
+          "YYYY-MM-DD HH:mm:ss"
+        ),
+    },
     { field: "date_ongoing", headerName: "Date Ongoing", width: 200 },
     { field: "date_end", headerName: "Date Ended", width: 200 },
+    {
+      field: "duration",
+      headerName: "Duration",
+      width: 160,
+      valueGetter: (params) => getDurationStr(m(params.row.date_ongoing), m(params.row.date_end)),
+    },
     { field: "transaction", headerName: "Transaction", width: 150 },
     { field: "date_created", headerName: "Date Created", width: 200 },
   ];
@@ -52,14 +69,14 @@ const QueueReport = () => {
     const formData = new FormData(e.target);
     const payload = Object.fromEntries(formData.entries());
 
-    console.log(payload)
+    console.log(payload);
 
     await httpPrivate
       .post("reports/queue", payload, {
         headers: { Authorization: `Bearer ${auth?.token?.token}` },
       })
       .then((response) => {
-       // console.log(response.data);
+        // console.log(response.data);
         setRows(response.data);
       })
       .catch((err) => {
@@ -98,8 +115,14 @@ const QueueReport = () => {
                 fullWidth
                 label="Date Criteria"
               >
-                <MenuItem value="created_at"> DATE CREATED</MenuItem>
-                <MenuItem value="date_onqueue"> DATE QUEUE</MenuItem>
+                <MenuItem value="created_at">
+                  {" "}
+                  DATE CREATED
+                </MenuItem>
+                <MenuItem value="date_onqueue">
+                  {" "}
+                  DATE QUEUE
+                </MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -128,7 +151,6 @@ const QueueReport = () => {
               }}
               defaultValue={m()}
               format="YYYY-MM-DD HH:mm:ss"
-              
             />
           </Grid>
           <Grid item xs={1} paddingRight={1}>
@@ -151,8 +173,10 @@ const QueueReport = () => {
           apiRef={apiRef}
           density="compact"
           slots={{ toolbar: GridToolbar }}
-          slotProps={{ toolbar: { csvOptions: { fileName: "Queue" } } }}
-          
+          slotProps={{
+            toolbar: { csvOptions: { fileName: "Queue" } },
+          }}
+          style={{ height: "80vh" }}
         />
       </Grid>
     </Box>

@@ -4,6 +4,9 @@ const useCategoryTemplate = () => {
   const [categoryTemplates, setCategoryTemplates] = useState([]);
 
   useEffect(() => {
+    async () => {
+      
+    }
     let ignore = false;
     const loadTemplates = async () => {
       const response = await httpPrivate.get("/category-template");

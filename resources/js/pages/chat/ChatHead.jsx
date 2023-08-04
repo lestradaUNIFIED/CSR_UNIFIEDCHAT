@@ -6,7 +6,7 @@ import websocket from "../../services/Ws";
 import ChatWindowContext from "../../context/ChatWindowProvider";
 import m from "moment";
 const ChatHead = (props) => {
-  const { deleteChatHead } = props;
+  const { deleteChatHead } = useContext(ChatWindowContext);
   const { chatRoom } = props.chatInfo;
   const initials = `${chatRoom?.chat_name?.charAt(
     0
@@ -17,8 +17,8 @@ const ChatHead = (props) => {
   const [chatActive, setChatActive] = useState(false);
   const [msgCount, setMsgCount] = useState(0);  
   const [chatHistory, setChatHistory] = useState(props.chatInfo.chatHistory);
-
-  const { showChatWindow } = useContext(ChatWindowContext);
+  const { showChatWindow } = useContext(ChatWindowContext); 
+   
 
   useEffect(() => {
     if (!wsRef.current && recon) {
@@ -57,6 +57,12 @@ const ChatHead = (props) => {
   }, [wsRef.current, recon]);
 
 
+const removeChatHead = () => {
+  setRecon(false);
+  wsRef.current.close();
+  deleteChatHead({chatRoom, chatHistory});
+
+}
 
   return (
     <Box>
@@ -88,7 +94,7 @@ const ChatHead = (props) => {
                 //    e.stopPropagation();
                 setCloseButton(false);
               }}
-              onClick={deleteChatHead}
+              onClick={removeChatHead}
               size="small"
             >
               <CloseIcon fontSize="small" style={{ color: "#ddd" }} />

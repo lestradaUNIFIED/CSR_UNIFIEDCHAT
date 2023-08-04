@@ -7,12 +7,15 @@ import { Box } from "@mui/material";
 import { useEffect } from "react";
 import { ToastContainer } from "react-toastify";
 import { httpPrivate } from "../services/Api";
+import useCategory from "../hooks/useCategory";
+import useCategoryTemplate from "../hooks/useCategoryTemplates";
 import '../bootstrap'
-
 
 
 function App() {
   const { auth, session, setAuth } = useAuth();
+  const {categories } = useCategory();
+  const { categoryTemplates } = useCategoryTemplate();
   
   useEffect(() => {
     let ignore = false;
@@ -27,7 +30,6 @@ function App() {
               setAuth({ token });
             });
         }
-
         loadUserInfo();
       }
     }
@@ -36,6 +38,13 @@ function App() {
       ignore = true;
     };
   }, []);
+
+  useEffect(() => {
+      if (auth?.token) {
+        
+        
+      }
+  }, [auth?.token])
 
   //console.log(auth);
   return (
