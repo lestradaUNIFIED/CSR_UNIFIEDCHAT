@@ -258,7 +258,7 @@ function ChatWindow(props) {
     reader.readAsArrayBuffer(imgSelect);
   };
   return (
-    <Box>
+    <Box sx={{height: "70vh"}}>
     
       <Slide direction="right" in>
         <div>
@@ -296,7 +296,7 @@ function ChatWindow(props) {
 
           >
             <Grid id="window-chat-header" container className="head">
-              <Grid item xs={11} sx={{ display: "flex" }}>
+              <Grid item xs={10} sx={{ display: "flex" }}>
                 <Avatar
                   sx={{
                     height: 30,
@@ -307,9 +307,9 @@ function ChatWindow(props) {
                 />
                 <div className="text">{chatRoom.chat_name}</div>
               </Grid>
-              <Grid item xs={1} sx={{ textAlign: "end" }}>
+              <Grid item xs={2} sx={{ textAlign: "end" }}>
                 <IconButton
-                  style={{ height: 20, width: 20, display : windowControl ? "flex" : "none" }}
+                  style={{ height: 20, width: 20, display : windowControl ? "inline" : "none", padding: 0 }}
                   onClick={() => {
                     minimizeChat({ chatRoom, chatHistory });
                   }}
@@ -323,7 +323,8 @@ function ChatWindow(props) {
                     width: 20,
                     paddingLeft: 2,
                     paddingRight: 2,
-                    display : windowControl ? "flex" : "none"
+                    padding: 0,
+                    display : windowControl ? "inline" : "none"
                   }}
                   onClick={maximizeChat}
                   color="default"
@@ -332,7 +333,7 @@ function ChatWindow(props) {
                 </IconButton>
 
                 <IconButton
-                  style={{ height: 20, width: 20, display : windowControl ? "flex" : "none" }}
+                  style={{ height: 20, width: 20, display : windowControl ? "inline" : "none", padding: 0 }}
                   onClick={() => {
                     closeChat();
                   }}
@@ -343,10 +344,11 @@ function ChatWindow(props) {
               </Grid>
             </Grid>
             <Grid id="window-chat-list" container>
-              <Grid item xs={12} sx={{height: "100%"}}>
+              <Grid item xs={12}>
                 <List
                   sx={{
-                    height: "100%",
+                    maxHeight: "70vh",
+                    height: style.listHeight,
                     maxWidth: "100%",
                     overflow: "auto",
                     marginLeft: 1,

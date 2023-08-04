@@ -1,11 +1,8 @@
-import { useEffect, useState } from "react";
-
-import useCategoryTemplate from "./useCategoryTemplates";
+import { useContext, useEffect, useState } from "react";
 import useAuth from "./useAuth";
 
 const useCategoryAccess = () => {
-    const { categoryTemplates } = useCategoryTemplate();
-    const { auth } = useAuth();
+    const { auth, categoryTemplates } = useAuth();
     const user = auth?.token?.user;
     const [ALLOWED_SUB_CATEGORY, SET_ALLOWED_SUB_CATEGORY] = useState([]);
     const [ALLOWED_CATEGORY, SET_ALLOWED_CATEGORY] = useState([]);

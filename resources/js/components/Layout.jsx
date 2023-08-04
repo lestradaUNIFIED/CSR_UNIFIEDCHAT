@@ -47,6 +47,7 @@ import WebsocketContext from "../context/WebsocketProvider";
 import websocket from "../services/Ws";
 import QueueIcon from "@mui/icons-material/Queue";
 import useFunctions from "../hooks/useFunctions";
+import ChatWindowHeadList from "../pages/chat/ChatWindowHeadsList";
 
 const drawerWidth = 200;
 
@@ -223,7 +224,11 @@ const Layout = () => {
               <div style={{ fontSize: "small" }}>
                 <span>Welcome! </span>
                 <Link to={`/user/${user?.id}`}>
-                  <span style={{ color: "#f7c214" }}>{`${user?.full_name} (${properCase(user?.nick_name || '')})`} </span>
+                  <span style={{ color: "#f7c214" }}>
+                    {`${user?.full_name} (${properCase(
+                      user?.nick_name || ""
+                    )})`}{" "}
+                  </span>
                 </Link>
               </div>
             </Typography>
@@ -350,11 +355,13 @@ const Layout = () => {
           }}
         >
           <Box className="App">
+          <ChatWindowHeadList />
             <Routers />
           </Box>
         </div>
       </LocalizationProvider>
-
+     
+ 
       <div style={{ position: "absolute", top: "10%", right: "20px" }}>
         <Badge
           badgeContent={queueRows.length}
@@ -369,6 +376,7 @@ const Layout = () => {
             </Tooltip>
           </Fab>
         </Badge>
+  
       </div>
     </Box>
   );

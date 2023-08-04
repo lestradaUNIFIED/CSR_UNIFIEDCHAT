@@ -495,7 +495,7 @@ function ChatRoom() {
   };
 
   return (
-    <Box paddingTop={3}>
+    <Box paddingTop={4.5} >
       <HelmetProvider>
         <Helmet>
           <title>Chat</title>
@@ -505,8 +505,7 @@ function ChatRoom() {
 
       {isChatRoomValid && (
         <Box>
-    <ChatWindowHeadList />
-          <Dialog fullScreen={fullScreen} open={confirmDialogOpen} fullWidth>
+            <Dialog fullScreen={fullScreen} open={confirmDialogOpen} fullWidth>
             <DialogTitle>{"End Chat?"}</DialogTitle>
             <DialogContent>
               <DialogContentText>
@@ -622,8 +621,8 @@ function ChatRoom() {
                           borderRightWidth: 1,
                           borderRight: 1,
                           borderRightColor: "#999999",
-                          height: "70vh",
-                          maxHeight: "70vh",
+                          height: "90vh",
+                          maxHeight: "80vh",
                           overflow: "auto",
                           fontSize: "smaller",
                           marginRight: 0,
@@ -827,6 +826,7 @@ function ChatRoom() {
                                 chatInfo={{ chatRoom, chatHistory }}
                                 chatList={chatHistory}
                                 key={roomId}
+                                style={{listHeight: "56vh"}}
                               />
                             )}
                           </Grid>
