@@ -2,9 +2,7 @@ import React from "react";
 import { createContext, useState } from "react";
 import { Stack, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import ChatWindow from "../pages/chat/ChatWindow";
 import ChatHead from "../pages/chat/ChatHead";
-import Draggable from "react-draggable";
 
 const ChatWindowContext = createContext({});
 
@@ -15,7 +13,7 @@ export const ChatWindowProvider = ({ children }) => {
 
   const showChatWindow = (chatInfo) => {
     const { chatRoom } = chatInfo;
-    console.log(chatRoom);
+  //  console.log(chatRoom);
     if (
       chatWindow.findIndex((value) => value.chatRoom.id === chatRoom.id) === -1
     ) {

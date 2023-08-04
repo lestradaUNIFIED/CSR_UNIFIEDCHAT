@@ -495,7 +495,7 @@ function ChatRoom() {
   };
 
   return (
-    <Box paddingTop={4.5} >
+    <Box paddingTop={3.5} >
       <HelmetProvider>
         <Helmet>
           <title>Chat</title>

@@ -14,7 +14,7 @@ import {
   Tooltip,
   ImageList,
   ImageListItemBar,
-  ImageListItem
+  ImageListItem,
 } from "@mui/material";
 import React, {
   Component,
@@ -70,9 +70,7 @@ function ChatWindow(props) {
     loaded: null,
   });
   const [base64Array, setBase64Array] = useState([]);
-
-
-
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (images.length === 0) {
@@ -80,34 +78,32 @@ function ChatWindow(props) {
     }
   }, [images]);
 
-
-
   useEffect(() => {
     let ignore = false;
-      
-      async function getChat() {
-        setChatHistory([]);
-             if (!ignore) {
-          await httpPrivate
-            .get(`/chat-message/messages/${chatRoom.id}`)
-            .then((response) => {
-              // console.log(response.data);
-              setChatHistory(response.data);
-            })
-            .catch((err) => {
-              console.log(err);
-            });
-        }
-       
+
+    async function getChat() {
+      setChatHistory([]);
+      if (!ignore) {
+        setLoading(true);
+        await httpPrivate
+          .get(`/chat-message/messages/${chatRoom.id}`)
+          .then((response) => {
+            // console.log(response.data);
+            setChatHistory(response.data);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+        setLoading(false);
       }
-      setImages([]);
-      getChat();
-   
+    }
+    setImages([]);
+    getChat();
+
     return () => {
       ignore = true;
     };
   }, [chatRoom]);
-
 
   useEffect(() => {
     if (!wsRef.current && recon) {
@@ -149,7 +145,7 @@ function ChatWindow(props) {
   }, [wsRef.current, recon]);
 
   useEffect(() => {
-    chatListRef.current.scroll({
+    chatListRef?.current?.scroll({
       top: chatListRef.current.scrollHeight,
     });
   }, [chatHistory]);
@@ -258,8 +254,7 @@ function ChatWindow(props) {
     reader.readAsArrayBuffer(imgSelect);
   };
   return (
-    <Box sx={{height: "70vh"}}>
-    
+    <Box>
       <Slide direction="right" in>
         <div>
           {showEmojis && (
@@ -267,7 +262,7 @@ function ChatWindow(props) {
               style={{
                 position: "absolute",
                 top: "-80px",
-                left: "0px",
+                right: "150px",
                 borderRadius: "20px",
                 backgroundColor: "red",
                 padding: 0,
@@ -289,12 +284,7 @@ function ChatWindow(props) {
               />
             </div>
           )}
-          <div
-            id="chatWindow"
-            className="chat-window"
-            style={style}
-
-          >
+          <div id="chatWindow" className="chat-window" style={style}>
             <Grid id="window-chat-header" container className="head">
               <Grid item xs={10} sx={{ display: "flex" }}>
                 <Avatar
@@ -309,7 +299,12 @@ function ChatWindow(props) {
               </Grid>
               <Grid item xs={2} sx={{ textAlign: "end" }}>
                 <IconButton
-                  style={{ height: 20, width: 20, display : windowControl ? "inline" : "none", padding: 0 }}
+                  style={{
+                    height: 20,
+                    width: 20,
+                    display: windowControl ? "inline" : "none",
+                    padding: 0,
+                  }}
                   onClick={() => {
                     minimizeChat({ chatRoom, chatHistory });
                   }}
@@ -324,7 +319,7 @@ function ChatWindow(props) {
                     paddingLeft: 2,
                     paddingRight: 2,
                     padding: 0,
-                    display : windowControl ? "inline" : "none"
+                    display: windowControl ? "inline" : "none",
                   }}
                   onClick={maximizeChat}
                   color="default"
@@ -333,7 +328,12 @@ function ChatWindow(props) {
                 </IconButton>
 
                 <IconButton
-                  style={{ height: 20, width: 20, display : windowControl ? "inline" : "none", padding: 0 }}
+                  style={{
+                    height: 20,
+                    width: 20,
+                    display: windowControl ? "inline" : "none",
+                    padding: 0,
+                  }}
                   onClick={() => {
                     closeChat();
                   }}
@@ -344,148 +344,159 @@ function ChatWindow(props) {
               </Grid>
             </Grid>
             <Grid id="window-chat-list" container>
-              <Grid item xs={12}>
-                <List
-                  sx={{
-                    maxHeight: "70vh",
-                    height: style.listHeight,
-                    maxWidth: "100%",
-                    overflow: "auto",
-                    marginLeft: 1,
-                    paddingRight: 1,
-                  }}
-                  ref={chatListRef}
-                >
-                  <ListItem disablePadding sx={{ paddingBottom: 1 }}>
-                    <Grid container style={{ display: "block" }}>
-                      <Grid container>
-                        <Grid item xs={12}>
-                          <Avatar sx={{ alignContent: "center" }} />
+              {loading && (
+                <Grid item xs={12} sx={{ height: style.listHeight }}>
+                  <div style={{position: "relative", top: "45%", left: "45%"}}>
+                    <Oval height={50} width={50}  />
+                  </div>
+                </Grid>
+              )}
+              {!loading && (
+                <Grid item xs={12}>
+                  <List
+                    sx={{
+                      maxHeight: "70vh",
+                      height: style.listHeight,
+                      maxWidth: "100%",
+                      overflow: "auto",
+                      marginLeft: 1,
+                      paddingRight: 1,
+                    }}
+                    ref={chatListRef}
+                  >
+                    <ListItem disablePadding sx={{ paddingBottom: 1 }}>
+                      <Grid container style={{ display: "block" }}>
+                        <Grid container>
+                          <Grid item xs={12}>
+                            <Avatar sx={{ alignContent: "center" }} />
+                          </Grid>
+                        </Grid>
+                        <Grid container>
+                          <Grid item xs={12}>
+                            <div
+                              style={{
+                                textAlign: "center",
+                                fontSize: "small",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {chatRoom.chat_name}
+                            </div>
+                          </Grid>
+                        </Grid>
+                        <Grid container>
+                          <Grid item xs={12}>
+                            <Divider />
+                          </Grid>
                         </Grid>
                       </Grid>
-                      <Grid container>
-                        <Grid item xs={12}>
-                          <div
-                            style={{
-                              textAlign: "center",
-                              fontSize: "small",
-                              fontWeight: "bold",
-                            }}
-                          >
-                            {chatRoom.chat_name}
-                          </div>
-                        </Grid>
-                      </Grid>
-                      <Grid container>
-                        <Grid item xs={12}>
-                          <Divider />
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                  </ListItem>
-                  {Object.entries(
-                    chatHistory.reduce((chat, row) => {
-                      const { queue_info } = row;
-                      if (!chat[queue_info]) {
-                        chat[queue_info] = [];
-                      }
-                      chat[queue_info].push(row);
+                    </ListItem>
+                    {Object.entries(
+                      chatHistory.reduce((chat, row) => {
+                        const { queue_info } = row;
+                        if (!chat[queue_info]) {
+                          chat[queue_info] = [];
+                        }
+                        chat[queue_info].push(row);
 
-                      return chat;
-                    }, {})
-                  ).map(([queue, chats]) => {
-                    const queue_info = JSON.parse(
-                      queue ||
-                        `"{"queue_status":"ONGOING", "queue_id" : ${chatRoom.current_queue_id}}"`
-                    );
-                    return (
-                      <React.Fragment key={queue}>
-                        {chats.map((chat, index) => {
-                          const messageFromMe = chat.message_from === "CSR";
-                          const sender = messageFromMe
-                            ? chat.csr
-                            : chat.customer;
-                          return (
-                            <React.Fragment key={`lisMessage${index}${queue}`}>
-                              <li
-                                className={
-                                  messageFromMe
-                                    ? "Messages-message currentMember"
-                                    : "Messages-message"
-                                }
+                        return chat;
+                      }, {})
+                    ).map(([queue, chats]) => {
+                      const queue_info = JSON.parse(
+                        queue ||
+                          `"{"queue_status":"ONGOING", "queue_id" : ${chatRoom.current_queue_id}}"`
+                      );
+                      return (
+                        <React.Fragment key={queue}>
+                          {chats.map((chat, index) => {
+                            const messageFromMe = chat.message_from === "CSR";
+                            const sender = messageFromMe
+                              ? chat.csr
+                              : chat.customer;
+                            return (
+                              <React.Fragment
+                                key={`lisMessage${index}${queue}`}
                               >
-                                <div className="Message-content">
-                                  <div className="avatar">
-                                    {!messageFromMe && (
-                                      <AccountCircleIcon
-                                        sx={{
-                                          height: "25px",
-                                          width: "25px",
-                                        }}
-                                        style={{
-                                          color: "#1178f5",
-                                        }}
-                                      />
-                                    )}
-                                    {messageFromMe && (
-                                      <SupportAgentSharpIcon
-                                        sx={{
-                                          height: "25px",
-                                          width: "25px",
-                                        }}
-                                        style={{
-                                          color: "#fc821e",
-                                        }}
-                                      />
-                                    )}
-                                  </div>
-                                  <div
-                                    className="text"
-                                    style={{
-                                      fontSize: "x-small",
-                                      textAlign: messageFromMe
-                                        ? "end"
-                                        : "start",
-                                    }}
-                                  >
-                                    {chat.message}
-                                    {/*
+                                <li
+                                  className={
+                                    messageFromMe
+                                      ? "Messages-message currentMember"
+                                      : "Messages-message"
+                                  }
+                                >
+                                  <div className="Message-content">
+                                    <div className="avatar">
+                                      {!messageFromMe && (
+                                        <AccountCircleIcon
+                                          sx={{
+                                            height: "25px",
+                                            width: "25px",
+                                          }}
+                                          style={{
+                                            color: "#1178f5",
+                                          }}
+                                        />
+                                      )}
+                                      {messageFromMe && (
+                                        <SupportAgentSharpIcon
+                                          sx={{
+                                            height: "25px",
+                                            width: "25px",
+                                          }}
+                                          style={{
+                                            color: "#fc821e",
+                                          }}
+                                        />
+                                      )}
+                                    </div>
+                                    <div
+                                      className="text"
+                                      style={{
+                                        fontSize: "x-small",
+                                        textAlign: messageFromMe
+                                          ? "end"
+                                          : "start",
+                                      }}
+                                    >
+                                      {chat.message}
+                                      {/*
                                               <img
                                                 src={`data:image/jpeg;base64,${chat.message}`}
                                               />
                                               */}
 
-                                    <div className="timestamp">
-                                      {m(chat.created_at).format(
-                                        "YYYY-MM-DD HH:mm:ss"
-                                      )}
+                                      <div className="timestamp">
+                                        {m(chat.created_at).format(
+                                          "YYYY-MM-DD HH:mm:ss"
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              </li>
-                            </React.Fragment>
-                          );
-                        })}
-                        <div
-                          style={{
-                            paddingBottom: 30,
-                            marginTop: 30,
-                            fontWeight: "bold",
-                            display:
-                              queue_info.queue_status === "ONGOING"
-                                ? "none"
-                                : "block",
-                          }}
-                        >
-                          <Divider light={false}>
-                            {queue_info.queue_status}
-                          </Divider>
-                        </div>
-                      </React.Fragment>
-                    );
-                  })}
-                </List>
-              </Grid>
+                                </li>
+                              </React.Fragment>
+                            );
+                          })}
+                          <div
+                            style={{
+                              paddingBottom: 30,
+                              marginTop: 30,
+                              fontWeight: "bold",
+                              display:
+                                queue_info.queue_status === "ONGOING"
+                                  ? "none"
+                                  : "block",
+                            }}
+                          >
+                            <Divider light={false}>
+                              {queue_info.queue_status}
+                            </Divider>
+                          </div>
+                        </React.Fragment>
+                      );
+                    })}
+                  </List>
+                </Grid>
+              )}
             </Grid>
             <Grid
               id="window-chat-footer"
@@ -494,10 +505,10 @@ function ChatWindow(props) {
             >
               {+chatRoom.status_code === 3 && (
                 <Grid item xs={12}>
-                  
-                      <div className="chat-ended"> {`CHAT ${chatRoom.status_desc}`} </div>
-             
-                 
+                  <div className="chat-ended">
+                    {" "}
+                    {`CHAT ${chatRoom.status_desc}`}{" "}
+                  </div>
                 </Grid>
               )}
               {!(+chatRoom.status_code === 3) && (

@@ -23,7 +23,7 @@ return [
 
     'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
         '%s%s',
-        'csr-unifiedchat.azurewebsites.net',
+        'web.unifiedchat.ph,csr-unifiedchat.azurewebsites.net',
         Sanctum::currentApplicationUrlWithPort()
     ))),
 
