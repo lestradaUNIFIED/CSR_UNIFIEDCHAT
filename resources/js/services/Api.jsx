@@ -1,8 +1,7 @@
 import axios from "axios";
 import useAuth from "../hooks/useAuth";
-
-//const BASE_URL = "https://csr-unifiedchat.azurewebsites.net";
-const BASE_URL = "http://web.unifiedchat.ph";
+const BASE_URL = "https://csr-unifiedchat.azurewebsites.net";
+//const BASE_URL = "http://web.unifiedchat.ph";
 
 //const BASE_URL = 'https://172.168.1.6:8000'
 const CHAT_API_URL = "http://localhost:8086/";

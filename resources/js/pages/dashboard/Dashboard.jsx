@@ -242,12 +242,7 @@ function Dashboard() {
         updated_queue.room_code = updated_chat_room.room_code;
         updated_queue.room_id = updated_chat_room.id; 
         setState({ data: updated_queue });
-       
-  
-
-        
-    
-        
+            
       }
 
       //else if (result.isDenied) {

@@ -63,7 +63,26 @@ export const WebsocketProvider = ({ children }) => {
           setQueueRows((prevRows) =>
             [...prevRows].filter((row) => +row.id !== +dataTxt.id)
           );
-        } else {
+        }
+        else if(dataTxt.cancel) {
+          setSbOpen({
+            open: true,
+            severity: "error",
+            message: `${dataTxt.chat_name} cancelled queue. `,
+          });
+
+          createToast({
+            type: "error",
+            message: `${dataTxt.chat_name} cancelled queue. `,
+          });
+
+          setQueueRows((prevRows) =>
+            [...prevRows].filter((row) => +row.id !== +dataTxt.id)
+          );
+
+        }
+        
+        else {
           if (dataTxt.queue_status === "WAITING") {
          
       //        console.log(ALLOWED_CATEGORY);
