@@ -1,0 +1,105 @@
+{
+  "node_modules/web-vitals/dist/web-vitals.js": {
+    "file": "assets/web-vitals-60d3425a.js",
+    "isDynamicEntry": true,
+    "src": "node_modules/web-vitals/dist/web-vitals.js"
+  },
+  "resources/js/assets/images/icons/Unified_Logo-01.png": {
+    "file": "assets/Unified_Logo-01-eb9d1ddf.png",
+    "src": "resources/js/assets/images/icons/Unified_Logo-01.png"
+  },
+  "resources/js/assets/images/icons/btn-blue-post.png": {
+    "file": "assets/btn-blue-post-b530effb.png",
+    "src": "resources/js/assets/images/icons/btn-blue-post.png"
+  },
+  "resources/js/assets/images/icons/hamburger-line-default.png": {
+    "file": "assets/hamburger-line-default-bffa65c2.png",
+    "src": "resources/js/assets/images/icons/hamburger-line-default.png"
+  },
+  "resources/js/assets/images/icons/icon-comment.png": {
+    "file": "assets/icon-comment-d1553c16.png",
+    "src": "resources/js/assets/images/icons/icon-comment.png"
+  },
+  "resources/js/assets/images/icons/icon-crown.png": {
+    "file": "assets/icon-crown-7826d6c3.png",
+    "src": "resources/js/assets/images/icons/icon-crown.png"
+  },
+  "resources/js/assets/images/icons/icon-device-message.png": {
+    "file": "assets/icon-device-message-f3b3245f.png",
+    "src": "resources/js/assets/images/icons/icon-device-message.png"
+  },
+  "resources/js/assets/images/icons/icon-ellipsis.png": {
+    "file": "assets/icon-ellipsis-24c26722.png",
+    "src": "resources/js/assets/images/icons/icon-ellipsis.png"
+  },
+  "resources/js/assets/images/icons/icon-home-active.png": {
+    "file": "assets/icon-home-active-c99b58c5.png",
+    "src": "resources/js/assets/images/icons/icon-home-active.png"
+  },
+  "resources/js/assets/images/icons/icon-home.png": {
+    "file": "assets/icon-home-39091327.png",
+    "src": "resources/js/assets/images/icons/icon-home.png"
+  },
+  "resources/js/assets/images/icons/icon-like.png": {
+    "file": "assets/icon-like-7bfdfd42.png",
+    "src": "resources/js/assets/images/icons/icon-like.png"
+  },
+  "resources/js/assets/images/icons/icon-search.png": {
+    "file": "assets/icon-search-9e307c44.png",
+    "src": "resources/js/assets/images/icons/icon-search.png"
+  },
+  "resources/js/assets/images/icons/icon-share-active.png": {
+    "file": "assets/icon-share-active-6d20b1c9.png",
+    "src": "resources/js/assets/images/icons/icon-share-active.png"
+  },
+  "resources/js/assets/images/icons/icon-share.png": {
+    "file": "assets/icon-share-0296c90f.png",
+    "src": "resources/js/assets/images/icons/icon-share.png"
+  },
+  "resources/js/assets/images/icons/icon-verified.png": {
+    "file": "assets/icon-verified-63a42ac3.png",
+    "src": "resources/js/assets/images/icons/icon-verified.png"
+  },
+  "resources/js/assets/images/icons/ups-logo.png": {
+    "file": "assets/ups-logo-3c01c958.png",
+    "src": "resources/js/assets/images/icons/ups-logo.png"
+  },
+  "resources/js/assets/images/sample/avatar1-big.png": {
+    "file": "assets/avatar1-big-1353620f.png",
+    "src": "resources/js/assets/images/sample/avatar1-big.png"
+  },
+  "resources/js/assets/images/sample/avatar1.png": {
+    "file": "assets/avatar1-6ac258d2.png",
+    "src": "resources/js/assets/images/sample/avatar1.png"
+  },
+  "resources/js/assets/images/sample/avatar2.png": {
+    "file": "assets/avatar2-f6cb4327.png",
+    "src": "resources/js/assets/images/sample/avatar2.png"
+  },
+  "resources/js/assets/images/sample/media1.png": {
+    "file": "assets/media1-fe75a32f.png",
+    "src": "resources/js/assets/images/sample/media1.png"
+  },
+  "resources/js/assets/images/sample/video.jpg": {
+    "file": "assets/video-2efe8b9d.jpg",
+    "src": "resources/js/assets/images/sample/video.jpg"
+  },
+  "resources/js/index.css": {
+    "file": "assets/index-c72135ed.css",
+    "src": "resources/js/index.css"
+  },
+  "resources/js/index.jsx": {
+    "assets": [
+      "assets/Unified_Logo-01-eb9d1ddf.png"
+    ],
+    "css": [
+      "assets/index-c72135ed.css"
+    ],
+    "dynamicImports": [
+      "node_modules/web-vitals/dist/web-vitals.js"
+    ],
+    "file": "assets/index-86d71e6c.js",
+    "isEntry": true,
+    "src": "resources/js/index.jsx"
+  }
+}

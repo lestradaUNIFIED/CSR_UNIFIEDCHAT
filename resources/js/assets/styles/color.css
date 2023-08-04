@@ -1,0 +1,14 @@
+.bg-white{
+    background-color: white;
+}
+.bg-yellow{
+    background-color: #f5bf19;
+}
+
+.bg-yellow-gradient{
+    background: linear-gradient(68deg, rgba(244,247,86,1) 0%, rgba(255,232,160,1) 50%, rgba(255,222,130,0.7091211484593838) 100%);
+}
+
+.txt-yellow{
+    color: #f5bf19;
+}

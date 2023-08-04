@@ -1,0 +1,36 @@
+.grid-container {
+  font-size: smaller;
+}
+
+.grid-container .TextField {
+  font-size: smaller;
+  border-radius: 20px;
+}
+
+.header {
+  background-color: #525252;
+  height: 50px;
+  box-shadow: 8px 5px 8px #888888;
+  border-top-right-radius: 20px;
+  border-bottom-left-radius: 20px;
+}
+.headerText {
+  color: white;
+  font-size: medium;
+  font-weight: bold;
+  align-content: center;
+  display: block;
+  position: relative;
+  top: 30%;
+  padding-left: 10px;
+}
+.backIcon {
+  color: white;
+  font-size: medium;
+  font-weight: bold;
+  align-content: center;
+  display: block;
+  position: relative;
+  padding-left: 10px;
+  top: 10%;
+}

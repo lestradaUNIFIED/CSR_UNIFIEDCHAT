@@ -1,0 +1,121 @@
+.login-body{
+    display: flex;
+    justify-content: center;
+    width: 1000px;
+    height: 550px;
+    top: 50%;
+    position: absolute;
+    left: 50%;
+    overflow: hidden;
+    transform: translate(-50%, -50%);
+}
+
+.login-wrapper{
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.login-right{
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    border-radius: 40px 0px 0px 40px;
+    overflow: hidden;
+    left: 50%;
+    transition: 0.3s ease-out all;
+}
+.login-right.switch{
+    border-radius: 0px 40px 40px 0px;
+    left: 0;
+}
+
+.login-left.switch{
+    left: 50%;
+    opacity: 100%;
+}
+
+.login-left{
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    top: 0;
+    left: 0;
+}
+
+.login-icon{
+    width: 200px;
+    height: 200px;
+}
+
+.blob1{
+    position: absolute;
+    content: '';
+    display: block;
+    width: 200px;
+    height: 200px;
+    border-radius: 100%;
+    background-color: #f5bf19;
+    top:400px;
+    left: 450px;
+    opacity: 20%;
+}
+.blob2{
+    position: absolute;
+    content: '';
+    display: block;
+    width: 150px;
+    height: 150px;
+    border-radius: 100%;
+    background-color: #f5bf19;
+    top:200px;
+    left: 50px;
+    opacity: 20%;
+}
+.blob3{
+    position: absolute;
+    content: '';
+    display: block;
+    width: 150px;
+    height: 150px;
+    border-radius: 100%;
+    background-color: #f5bf19;
+    top:370px;
+    left: 75px;
+    opacity: 20%;
+    transform: scale(0.5);
+}
+.blob4{
+    position: absolute;
+    content: '';
+    display: block;
+    width: 150px;
+    height: 150px;
+    border-radius: 100%;
+    background-color: #f5bf19;
+    top:250px;
+    left: 425px;
+    opacity: 20%;
+    transform: scale(0.7);
+}
+
+@keyframes login_right{
+    from
+    { 
+      position: absolute;  
+      right: 0;
+    }
+    to{
+        position: absolute;
+        right: 462px;
+    }
+    
+}

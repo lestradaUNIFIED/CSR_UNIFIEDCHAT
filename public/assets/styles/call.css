@@ -1,0 +1,123 @@
+.create-meeting{
+    width: 20px;
+    width: 90%;
+    background-color: rgb(240, 240, 240);
+    color: rgb(158, 152, 152);
+    display: flex;
+    justify-content: center;
+    border-radius: 20px;
+}
+.video-room-wrapper{
+    display: flex;
+    flex-direction: column;
+}
+.video-call-title{
+    font-size: 25px;
+    font-weight: 500;
+}
+.video-call{
+    display: flex;
+    justify-content: center;
+    border-radius: 20px;
+    flex-direction: column;
+}
+.you-panel{
+    width: 100%;
+    height: 600px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.participants{
+    flex-direction: row;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    height: 600px; 
+    margin-top: 1.5em;
+}
+.participant{
+    width:32%;
+    height: 205px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-position: center;
+    border-radius: 20px;
+}
+.name-tag{
+    width: 100px;
+    height: 50px;
+    font-size: 17px;
+    font-weight: 500;
+    color: white;
+    border-radius: 25px;
+    background-color: rgb(62, 62, 62);
+    background-color: rgba(46, 46, 46, 0.8);
+    margin: 0.5em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+.participant-name-tag{
+    width: 150px;
+    height: 30px;
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    border-radius: 25px;
+    background: rgba(73, 72, 72, 0.3);
+    backdrop-filter: blur(10px);
+    margin: 0.5em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+.toolbar{
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1em;
+}
+.btn-circle{
+    width: 50px;
+    height: 50px;
+    background: rgba(73, 72, 72, 0.3);
+    backdrop-filter: blur(10px);
+    border-radius: 100%;
+    border: none;
+    font-size: 20px;
+    justify-content: center;
+    align-items: center;
+    margin-right: 0.5em;
+}
+.btn-end-call{
+    width: 100px;
+    height: 50px;
+    background-color: #df6a61;
+    border-radius: 50px;
+    border: none;
+    font-size: 20px;
+    justify-content: center;
+    align-items: center;
+}
+.phone-icon{
+    transform: rotate(40deg);
+}
+label{
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.data-grid {
+    box-shadow: 5px 5px 5px 1px #888888;
+}
