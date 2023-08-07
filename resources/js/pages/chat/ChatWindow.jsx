@@ -1,4 +1,5 @@
 import "../../assets/styles/chat.css";
+import "react-photo-view/dist/react-photo-view.css";
 import {
   Grid,
   IconButton,
@@ -57,9 +58,8 @@ import m from "moment";
 import Loader from "../../Components/Loader";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { useNavigate } from "react-router-dom";
-
 import PauseCircleOutlineIcon from "@mui/icons-material/PauseCircleOutline";
-import zIndex from "@mui/material/styles/zIndex";
+import { PhotoProvider, PhotoView } from "react-photo-view";
 function ChatWindow(props) {
   const { chatInfo, chatList, windowControl, style } = props;
   const { chatRoom } = chatInfo;
@@ -68,7 +68,7 @@ function ChatWindow(props) {
   const [message, setMessage] = useState("");
   const [chatActive, setChatActive] = useState(false);
   const { auth } = useAuth();
-  const { properCase } = useFunctions();
+  const { properCase, tryJSONParse } = useFunctions();
   const { setNotif } = useContext(NotificationContext);
   const user = auth?.token?.user;
   const wsRef = useRef(null);
@@ -180,10 +180,8 @@ function ChatWindow(props) {
   const sendMessage = (e) => {
     e.preventDefault();
 
-    if (wsRef.current.readyState !== 1) {
-      alert("Cannot Send Message at this time!");
-    } else {
-      wsRef.current?.send(
+    async function sendText() {
+      await wsRef.current?.send(
         JSON.stringify({
           chat_room_id: chatRoom.id,
           receiver_id: chatRoom.customer_id,
@@ -194,8 +192,43 @@ function ChatWindow(props) {
           message_from: "CSR",
         })
       );
+    }
+    async function sendImages() {
+      await wsRef.current?.send(
+        JSON.stringify({
+          chat_room_id: chatRoom.id,
+          receiver_id: chatRoom.customer_id,
+          message: JSON.stringify(base64Array),
+          sender_id: user?.id,
+          sender: properCase(user?.nick_name),
+          room_code: chatRoom.room_code,
+          message_from: "CSR",
+        })
+      );
+    }
 
-      setMessage("");
+    if (wsRef.current.readyState !== 1) {
+      alert("Cannot Send Message at this time!");
+    } else {
+      if (message === "" && images.length === 0) {
+        return;
+      }
+
+      if (message === "" && images.length > 0) {
+        sendImages();
+        setImages((img) => []);
+        setBase64Array((b64arr) => []);
+      } else if (message !== "" && images.length > 0) {
+        sendText();
+        sendImages();
+
+        setMessage("");
+        setImages((img) => []);
+        setBase64Array((b64arr) => []);
+      } else if (message !== "") {
+        sendText();
+        setMessage("");
+      }
     }
   };
 
@@ -531,6 +564,11 @@ function ChatWindow(props) {
                         <React.Fragment key={queue}>
                           {chats.map((chat, index) => {
                             const messageFromMe = chat.message_from === "CSR";
+                            const image_message = tryJSONParse(
+                              chat.message,
+                              null
+                            );
+
                             const sender = messageFromMe
                               ? chat.csr
                               : chat.customer;
@@ -579,7 +617,34 @@ function ChatWindow(props) {
                                           : "start",
                                       }}
                                     >
-                                      {chat.message}
+                                      {Array.isArray(image_message) ? (
+                                        <PhotoProvider maskOpacity={0.8}  >
+                                          {image_message?.map(
+                                            (imgUrl, index) => (
+                                              <PhotoView
+                                                key={`PhotoView-${chat.id}-${index}`}
+                                                src={`data:image/jpeg;base64,${imgUrl}`}
+                                                className="photo-viewer"
+                                              >
+                                                <img
+                                                  key={`img-${chat.id}-${index}`}
+                                                  style={{
+                                                    height: 100,
+                                                    width: "100px",
+                                                    borderRadius: "10px",
+                                                    padding: 0.5
+                                                    
+                                                  }}
+                                                  src={`data:image/jpeg;base64,${imgUrl}`}
+                                                  className="img"
+                                                />
+                                              </PhotoView>
+                                            )
+                                          )}
+                                        </PhotoProvider>
+                                      ) : (
+                                        chat.message
+                                      )}
                                       {/*
                                               <img
                                                 src={`data:image/jpeg;base64,${chat.message}`}
@@ -689,56 +754,59 @@ function ChatWindow(props) {
                                   setShowEmojis(!showEmojis);
                                 }}
                                 disabled={!chatActive}
-
                               >
                                 <EmojiEmotionsIcon
                                   style={{ color: "#006aff" }}
                                 />
                               </IconButton>
                               <Tooltip title="Photo">
-                                <IconButton
-                                  component="label"
-                                  sx={{
-                                    padding: 0.3,
-                                  }}
-                                  disabled={!chatActive}
-                                >
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    style={{
-                                      display: "none",
+                                <span>
+                                  <IconButton
+                                    component="label"
+                                    sx={{
+                                      padding: 0.3,
                                     }}
-                                    onChange={handleFileChange}
-                                    name="file"
-                                    multiple
-                                  />
-                                  <PhotoIcon
-                                    style={{
-                                      color: "#0747f5",
-                                    }}
-                                    fontSize="small"
-                                  />
-                                </IconButton>
+                                    disabled={!chatActive}
+                                  >
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      style={{
+                                        display: "none",
+                                      }}
+                                      onChange={handleFileChange}
+                                      name="file"
+                                      multiple
+                                    />
+                                    <PhotoIcon
+                                      style={{
+                                        color: "#0747f5",
+                                      }}
+                                      fontSize="small"
+                                    />
+                                  </IconButton>
+                                </span>
                               </Tooltip>
 
                               <Tooltip title="End Chat">
-                                <IconButton
-                                  onClick={() => {
-                                    setConfirmDialogOpen(true);
-                                  }}
-                                  sx={{
-                                    padding: 0.3,
-                                  }}
-                                  disabled={!chatActive}
-                                >
-                                  <DoDisturbAltRoundedIcon
-                                    fontSize="small"
-                                    style={{
-                                      color: "#fc0303",
+                                <span>
+                                  <IconButton
+                                    onClick={() => {
+                                      setConfirmDialogOpen(true);
                                     }}
-                                  />
-                                </IconButton>
+                                    sx={{
+                                      padding: 0.3,
+                                    }}
+                                    disabled={!chatActive}
+                                  >
+                                    <DoDisturbAltRoundedIcon
+                                      fontSize="small"
+                                      style={{
+                                        color: "#fc0303",
+                                      }}
+                                    />
+                                  </IconButton>
+                                </span>
                               </Tooltip>
                             </InputAdornment>
                           ),

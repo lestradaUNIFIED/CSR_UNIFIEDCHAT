@@ -143,7 +143,6 @@ function ChatRoom() {
           console.log(
             "Chat Connected ",
             m().format("YYYY-MM-DD HH:mm:ss"),
-            wsRef.current
           );
         }
       };

@@ -60,5 +60,8 @@
         "sweetalert2": "^11.7.10",
         "vite": "^4.4.8",
         "web-vitals": "^2.1.4"
+    },
+    "dependencies": {
+        "react-photo-view": "^1.2.3"
     }
 }

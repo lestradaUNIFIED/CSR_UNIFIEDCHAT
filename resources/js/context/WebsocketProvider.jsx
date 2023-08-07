@@ -6,6 +6,7 @@ import useToastify from "../hooks/useToastify";
 import m from "moment";
 import useAuth from "../hooks/useAuth";
 import useCategoryAccess from "../hooks/useCategoryAccess";
+import useFunctions from "../hooks/useFunctions";
 const WebsocketContext = createContext("");
 
 export const WebsocketProvider = ({ children }) => {
@@ -22,7 +23,7 @@ export const WebsocketProvider = ({ children }) => {
   const { setNotif } = useContext(NotificationContext);
   const { createToast } = useToastify();
   const { ALLOWED_CATEGORY } = useCategoryAccess();
-
+const {properCase } = useFunctions();
 
   useEffect(() => {
     let ignore = false;
@@ -52,12 +53,12 @@ export const WebsocketProvider = ({ children }) => {
           setSbOpen({
             open: true,
             severity: "warning",
-            message: `${dataTxt.chat_name} was removed to the queue. `,
+            message: `${dataTxt.chat_name} was accepted by ${properCase(user?.nick_name)} `,
           });
 
           createToast({
             type: "warning",
-            message: `${dataTxt.chat_name} was removed to the queue. `,
+            message: `${dataTxt.chat_name} was accepted by ${properCase(user.nick_name)} `,
           });
 
           setQueueRows((prevRows) =>

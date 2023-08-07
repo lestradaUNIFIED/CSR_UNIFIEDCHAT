@@ -275,3 +275,11 @@
 .chat-window-profile {
     background-color: green;
 }
+
+.photo-viewer {
+    cursor: pointer;
+}
+
+.img:hover {
+    cursor: pointer;
+}

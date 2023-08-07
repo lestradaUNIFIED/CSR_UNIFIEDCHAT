@@ -30,8 +30,18 @@ const useFunctions = () => {
 
   };
 
+  const tryJSONParse = (str, strIfError ) => {
+    try {
+      return JSON.parse(str);
+    }
+    catch(e) {
+      return strIfError;
+    }
+  } 
+
   return {
     properCase,
+    tryJSONParse
   };
 };
 
