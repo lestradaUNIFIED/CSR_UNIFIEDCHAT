@@ -277,7 +277,7 @@
 }
 
 .photo-viewer {
-    cursor: pointer;
+    z-index: 9999999999999999999999;
 }
 
 .img:hover {

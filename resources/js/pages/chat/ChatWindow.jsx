@@ -180,12 +180,12 @@ function ChatWindow(props) {
   const sendMessage = (e) => {
     e.preventDefault();
 
-    async function sendText() {
+    async function sendText(msg) {
       await wsRef.current?.send(
         JSON.stringify({
           chat_room_id: chatRoom.id,
           receiver_id: chatRoom.customer_id,
-          message: message,
+          message: msg,
           sender_id: user?.id,
           sender: properCase(user?.nick_name),
           room_code: chatRoom.room_code,
@@ -216,17 +216,19 @@ function ChatWindow(props) {
 
       if (message === "" && images.length > 0) {
         sendImages();
+        sendText("Sent a Photo.");
         setImages((img) => []);
         setBase64Array((b64arr) => []);
       } else if (message !== "" && images.length > 0) {
-        sendText();
+        sendText(message);
         sendImages();
+        sendText("Sent a Photo.");
 
         setMessage("");
         setImages((img) => []);
         setBase64Array((b64arr) => []);
       } else if (message !== "") {
-        sendText();
+        sendText(message);
         setMessage("");
       }
     }
@@ -568,6 +570,9 @@ function ChatWindow(props) {
                               chat.message,
                               null
                             );
+                            if (chat.message === "Sent a Photo.") {
+                              return;
+                            }
 
                             const sender = messageFromMe
                               ? chat.csr
@@ -618,30 +623,31 @@ function ChatWindow(props) {
                                       }}
                                     >
                                       {Array.isArray(image_message) ? (
-                                        <PhotoProvider maskOpacity={0.8}  >
-                                          {image_message?.map(
-                                            (imgUrl, index) => (
-                                              <PhotoView
-                                                key={`PhotoView-${chat.id}-${index}`}
-                                                src={`data:image/jpeg;base64,${imgUrl}`}
-                                                className="photo-viewer"
-                                              >
-                                                <img
-                                                  key={`img-${chat.id}-${index}`}
-                                                  style={{
-                                                    height: 100,
-                                                    width: "100px",
-                                                    borderRadius: "10px",
-                                                    padding: 0.5
-                                                    
-                                                  }}
+                                        <div className="photo-viewer">
+                                          {" "}
+                                          <PhotoProvider maskOpacity={0.8}>
+                                            {image_message?.map(
+                                              (imgUrl, index) => (
+                                                <PhotoView
+                                                  key={`PhotoView-${chat.id}-${index}`}
                                                   src={`data:image/jpeg;base64,${imgUrl}`}
-                                                  className="img"
-                                                />
-                                              </PhotoView>
-                                            )
-                                          )}
-                                        </PhotoProvider>
+                                                >
+                                                  <embed
+                                                    key={`img-${chat.id}-${index}`}
+                                                    style={{
+                                                      height: 100,
+                                                      width: "100px",
+                                                      borderRadius: "10px",
+                                                      padding: 0.5,
+                                                    }}
+                                                    src={`data:image/jpeg;base64,${imgUrl}`}
+                                                    className="img"
+                                                  />
+                                                </PhotoView>
+                                              )
+                                            )}
+                                          </PhotoProvider>
+                                        </div>
                                       ) : (
                                         chat.message
                                       )}
@@ -770,7 +776,7 @@ function ChatWindow(props) {
                                   >
                                     <input
                                       type="file"
-                                      accept="image/*"
+                                      accept="image/*,video/*"
                                       style={{
                                         display: "none",
                                       }}
@@ -842,6 +848,7 @@ function ChatWindow(props) {
                             gap={5}
                           >
                             {images.map((img, index) => {
+                              const fileType = img.type.split("/");
                               return (
                                 <ImageListItem
                                   key={index}
@@ -849,13 +856,19 @@ function ChatWindow(props) {
                                     border: 1,
                                   }}
                                 >
-                                  <img
-                                    src={URL.createObjectURL(img)}
-                                    style={{
-                                      width: 105,
-                                      height: 30,
-                                    }}
-                                  />
+                                  {fileType[0] === "image" && (
+                                    <img
+                                      src={URL.createObjectURL(img)}
+                                      style={{
+                                        width: 105,
+                                        height: 30,
+                                      }}
+                                    />
+                                  )}
+                                  {
+                                    fileType[0] === "video" && 
+                                    <video src={URL.createObjectURL(img)}></video> 
+                                  }
 
                                   <ImageListItemBar
                                     position="top"

@@ -4,7 +4,7 @@ import ChatWindowContext from "../../context/ChatWindowProvider";
 import ChatWindow from "./ChatWindow";
 const ChatWindowHeadList = () => {
   const { chatWindow } = useContext(ChatWindowContext);
-  const [zIndex, setZIndex] = useState(9999);
+  const [zIndex, setZIndex] = useState(999);
  
     const bringToFront = (index) => {
         document.getElementById(`chatbox-${index}`).style.zIndex = zIndex;

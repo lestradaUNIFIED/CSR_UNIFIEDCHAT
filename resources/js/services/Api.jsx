@@ -1,6 +1,5 @@
 import axios from "axios";
 
-
 const BASE_URL = "https://csr-unifiedchat.azurewebsites.net";
 //const BASE_URL = "http://web.unifiedchat.ph";
 
@@ -17,7 +16,7 @@ export const httpPrivate = axios.create({
   baseURL: `${BASE_URL}/api`,
   headers: {
     "Content-Type": "application/json",
-    Accept : "application/json"
+    Accept: "application/json",
   },
   withCredentials: true,
 });
