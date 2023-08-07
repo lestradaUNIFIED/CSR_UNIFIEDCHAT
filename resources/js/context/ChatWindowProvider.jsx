@@ -73,6 +73,7 @@ export const ChatWindowProvider = ({ children }) => {
           right: "10px",
           textAlign: "right",
           bottom: "50px",
+          zIndex: "99999"
         }}
       >
         <Stack

@@ -72,7 +72,7 @@ import ChatWindowContext from "../../context/ChatWindowProvider";
 import useRandomColorGenerator from "../../hooks/useRandomColorGenerator";
 import ChatWindow from "./ChatWindow";
 import ChatWindowHeadList from "./ChatWindowHeadsList";
-
+import DoDisturbOffIcon from '@mui/icons-material/DoDisturbOff';
 function ChatRoom() {
   // const messages = this.state.messages;
 
@@ -606,6 +606,13 @@ function ChatRoom() {
               value={0}
               label={`WAITING (${roomByStatus["0"]?.length || 0})`}
             />
+            <Tab
+              icon={<DoDisturbOffIcon color="error" />}
+              iconPosition="start"
+              value={4}
+              label={`CANCELLED (${roomByStatus["4"]?.length || 0})`}
+            />
+            
           </Tabs>
 
           <Divider />
@@ -769,16 +776,6 @@ function ChatRoom() {
                                         display: "flex"
                                       }}
                                     >
-                                      <Tooltip title="End Chat">
-                                        <IconButton sx={{padding: 0, paddingRight:0.3, display: value.status_code !== "3" ? "flex" : "none"}}>
-                                          <DoDisturbAltRoundedIcon
-                                            style={{
-                                              fontSize: "small",
-                                            }}
-                                            color="error"
-                                          />
-                                        </IconButton>
-                                      </Tooltip>
                                       <Tooltip title="Pop-out Chat" >
                                         <IconButton sx={{padding: 0, display: "flex"}} onClick={() => { showChatWindow({chatRoom : value, chatHistory: []}) }}>
                                         <LaunchIcon

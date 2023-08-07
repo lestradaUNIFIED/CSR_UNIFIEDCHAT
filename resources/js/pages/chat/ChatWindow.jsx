@@ -1,7 +1,6 @@
 import "../../assets/styles/chat.css";
 import {
   Grid,
-  Grow,
   IconButton,
   List,
   Divider,
@@ -15,6 +14,20 @@ import {
   ImageList,
   ImageListItemBar,
   ImageListItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  useTheme,
+  useMediaQuery,
+  DialogTitle,
+  FormControl,
+  Select,
+  InputLabel,
+  MenuItem,
+  Chip,
+  Button,
+  Alert,
 } from "@mui/material";
 import React, {
   Component,
@@ -42,6 +55,11 @@ import DoDisturbAltRoundedIcon from "@mui/icons-material/DoDisturbAltRounded";
 import { httpPrivate } from "../../services/Api";
 import m from "moment";
 import Loader from "../../Components/Loader";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import { useNavigate } from "react-router-dom";
+
+import PauseCircleOutlineIcon from "@mui/icons-material/PauseCircleOutline";
+import zIndex from "@mui/material/styles/zIndex";
 function ChatWindow(props) {
   const { chatInfo, chatList, windowControl, style } = props;
   const { chatRoom } = chatInfo;
@@ -71,7 +89,13 @@ function ChatWindow(props) {
   });
   const [base64Array, setBase64Array] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [concernStatus, setConcernStatus] = useState("RESOLVED");
+  const [remarks, setRemarks] = useState("");
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
+  const [chatEnded, setChatEnded] = useState(false);
+  const navigate = useNavigate();
   useEffect(() => {
     if (images.length === 0) {
       setSize({ height: 0 });
@@ -149,6 +173,9 @@ function ChatWindow(props) {
       top: chatListRef.current.scrollHeight,
     });
   }, [chatHistory]);
+  const closeDialog = () => {
+    setConfirmDialogOpen(false);
+  };
 
   const sendMessage = (e) => {
     e.preventDefault();
@@ -174,7 +201,6 @@ function ChatWindow(props) {
 
   const closeChat = () => {
     wsRef.current.close();
-
     closeChatWindow(chatRoom.id);
   };
 
@@ -222,6 +248,47 @@ function ChatWindow(props) {
     setSize({ height: 100 });
     // setState({ images: (prevImages) => [...prevImages, e.target.files] });
   };
+  const confirmEndChat = async () => {
+    setConfirmDialogOpen(false);
+
+    const closeChat = async () => {
+      return await httpPrivate
+        .put(`queue/action/4/${chatRoom.current_queue_id}`, {
+          queue_status: concernStatus,
+          remarks: remarks,
+          date_end: m().format("YYYY-MM-DD HH:mm:ss"),
+          room_id: chatRoom.id,
+        })
+        .then((response) => {
+          return response.data;
+        });
+    };
+
+    wsRef?.current?.send(
+      JSON.stringify({
+        chat_room_id: chatRoom.id,
+        receiver_id: chatRoom.customer_id,
+        message: `CSR set the chat status to ${concernStatus}`,
+        sender_id: user.id,
+        sender: "CSR Agent",
+        room_code: chatRoom.room_code,
+        message_from: "CSR",
+      })
+    );
+
+    const updatedChatRoom = await closeChat();
+
+    if (concernStatus === "RESOLVED") {
+      chatRoom.status_code = "3";
+      chatRoom.status_desc = "DONE";
+
+      setChatEnded(true);
+    } else {
+    }
+    //console.log(updatedChatRoom.status_code)
+    navigate("/");
+  };
+
   const ARRAY_BUFFER_TO_BASE64 = (ARRAY_BUFFER) => {
     let binary = "";
     const bytes = new Uint8Array(ARRAY_BUFFER);
@@ -255,35 +322,87 @@ function ChatWindow(props) {
   };
   return (
     <Box>
+      <Dialog
+        fullScreen={fullScreen}
+        open={confirmDialogOpen}
+        fullWidth
+        sx={{ zIndex: "999999999999" }}
+      >
+        <DialogTitle>{"End Chat?"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Choose the status of the concern.
+          </DialogContentText>
+          <Grid container paddingTop={3}>
+            <FormControl fullWidth>
+              <InputLabel>Status</InputLabel>
+              <Select
+                value={concernStatus}
+                fullWidth
+                label="Status"
+                onChange={(e) => {
+                  setConcernStatus(e.target.value);
+                }}
+                size="small"
+                MenuProps={{ style: { zIndex: "9999999999999999999999999" } }}
+              >
+                <MenuItem value="RESOLVED">
+                  <Chip
+                    icon={
+                      <CheckCircleOutlineIcon
+                        style={{
+                          color: "#007002",
+                        }}
+                      />
+                    }
+                    label="Resolved"
+                  />
+                </MenuItem>
+                <MenuItem value="PENDING">
+                  <Chip
+                    icon={
+                      <PauseCircleOutlineIcon
+                        style={{
+                          color: "#f78e05",
+                        }}
+                      />
+                    }
+                    label="Pending"
+                  />
+                </MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid container paddingTop={2}>
+            <FormControl fullWidth>
+              <TextField
+                size="small"
+                fullWidth
+                label="Remarks"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                multiline
+                value={remarks}
+                onChange={(e) => {
+                  setRemarks(e.currentTarget.value);
+                }}
+              />
+            </FormControl>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button autoFocus onClick={closeDialog}>
+            CANCEL
+          </Button>
+          <Button autoFocus onClick={confirmEndChat}>
+            AGREE
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Slide direction="right" in>
         <div>
-          {showEmojis && (
-            <div
-              style={{
-                position: "absolute",
-                top: "-80px",
-                right: "150px",
-                borderRadius: "20px",
-                backgroundColor: "red",
-                padding: 0,
-                maxWidth: "180px",
-                maxHeight: "100px",
-                zIndex: "99999",
-              }}
-            >
-              <Picker
-                data={data}
-                onEmojiSelect={addEmoji}
-                theme="dark"
-                onClickOutside={() => {
-                  setShowEmojis(false);
-                }}
-                emojiSize={20}
-                emojiButtonSize={30}
-                style={{ height: "100px" }}
-              />
-            </div>
-          )}
           <div id="chatWindow" className="chat-window" style={style}>
             <Grid id="window-chat-header" container className="head">
               <Grid item xs={10} sx={{ display: "flex" }}>
@@ -346,8 +465,10 @@ function ChatWindow(props) {
             <Grid id="window-chat-list" container>
               {loading && (
                 <Grid item xs={12} sx={{ height: style.listHeight }}>
-                  <div style={{position: "relative", top: "45%", left: "45%"}}>
-                    <Oval height={50} width={50}  />
+                  <div
+                    style={{ position: "relative", top: "45%", left: "45%" }}
+                  >
+                    <Oval height={50} width={50} />
                   </div>
                 </Grid>
               )}
@@ -520,6 +641,34 @@ function ChatWindow(props) {
                   onSubmit={sendMessage}
                 >
                   <Grid container gap={1}>
+                    {showEmojis && (
+                      <div
+                        style={{
+                          position: "relative",
+                          bottom: "430px",
+                          left: "70%",
+                          borderRadius: "20px",
+                          backgroundColor: "red",
+                          padding: 0,
+                          width: "0",
+                          height: "0px",
+                          zIndex: "99999",
+                          display: showEmojis ? "block" : "none",
+                        }}
+                      >
+                        <Picker
+                          data={data}
+                          onEmojiSelect={addEmoji}
+                          theme="dark"
+                          onClickOutside={() => {
+                            setShowEmojis(false);
+                          }}
+                          emojiSize={20}
+                          emojiButtonSize={30}
+                          height="0px"
+                        />
+                      </div>
+                    )}
                     <Grid item xs={12}>
                       <TextField
                         sx={{
@@ -539,6 +688,8 @@ function ChatWindow(props) {
                                   e.stopPropagation();
                                   setShowEmojis(!showEmojis);
                                 }}
+                                disabled={!chatActive}
+
                               >
                                 <EmojiEmotionsIcon
                                   style={{ color: "#006aff" }}
@@ -550,6 +701,7 @@ function ChatWindow(props) {
                                   sx={{
                                     padding: 0.3,
                                   }}
+                                  disabled={!chatActive}
                                 >
                                   <input
                                     type="file"
@@ -578,6 +730,7 @@ function ChatWindow(props) {
                                   sx={{
                                     padding: 0.3,
                                   }}
+                                  disabled={!chatActive}
                                 >
                                   <DoDisturbAltRoundedIcon
                                     fontSize="small"

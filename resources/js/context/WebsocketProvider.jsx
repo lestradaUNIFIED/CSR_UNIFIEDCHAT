@@ -84,7 +84,7 @@ export const WebsocketProvider = ({ children }) => {
         
         else {
           if (dataTxt.queue_status === "WAITING") {
-         
+       
       //        console.log(ALLOWED_CATEGORY);
               if (ALLOWED_CATEGORY.find((cat) => cat === '*' ? true : +cat === dataTxt.category_id)) {
                 setSbOpen({
@@ -100,9 +100,6 @@ export const WebsocketProvider = ({ children }) => {
                 });
   
               }
-            
-  
-            
 
           }
         }
