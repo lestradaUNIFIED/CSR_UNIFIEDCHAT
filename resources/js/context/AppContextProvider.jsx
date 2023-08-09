@@ -7,14 +7,16 @@ import { NotificationProvider } from "./DesktopNotificationProvider";
 import { combineComponents } from "./CombineAllContext";
 import { DialogProvider } from "./DialogProvider";
 import { ChatWindowProvider } from "./ChatWindowProvider";
+import { ChatProvider } from "./ChatProvider";
 
 const providers = [
   AuthProvider,
   NotificationProvider,
+  ChatProvider,
   QueueProvider,
   RolesProvider,
   WebsocketProvider,
   DialogProvider,
-  ChatWindowProvider
+  ChatWindowProvider,
 ];
 export const AppContextProvider = combineComponents(...providers);

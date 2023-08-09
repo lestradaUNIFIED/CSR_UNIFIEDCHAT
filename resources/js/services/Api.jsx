@@ -21,6 +21,16 @@ export const httpPrivate = axios.create({
   withCredentials: true,
 });
 
+export const httpPlain = axios.create({
+  baseURL: `${BASE_URL}/api`,
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+  withCredentials: true,
+});
+
+
 export const httpAuth = axios.create({
   baseURL: BASE_URL,
   headers: { "Content-Type": "application/json" },

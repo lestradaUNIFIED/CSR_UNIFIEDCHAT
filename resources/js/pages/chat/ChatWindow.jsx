@@ -29,6 +29,8 @@ import {
   Chip,
   Button,
   Alert,
+  Fab,
+  Icon,
 } from "@mui/material";
 import React, {
   Component,
@@ -53,12 +55,13 @@ import ChatWindowContext from "../../context/ChatWindowProvider";
 import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
 import DoDisturbAltRoundedIcon from "@mui/icons-material/DoDisturbAltRounded";
-import { httpPrivate } from "../../services/Api";
+import { httpPlain, httpPrivate } from "../../services/Api";
 import m from "moment";
 import Loader from "../../Components/Loader";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { useNavigate } from "react-router-dom";
 import PauseCircleOutlineIcon from "@mui/icons-material/PauseCircleOutline";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 function ChatWindow(props) {
   const { chatInfo, chatList, windowControl, style } = props;
@@ -73,7 +76,7 @@ function ChatWindow(props) {
   const user = auth?.token?.user;
   const wsRef = useRef(null);
   const chatListRef = useRef(null);
-  const [key, setKey] = useState(chatRoom.id);
+  const [key, setKey] = useState(chatRoom?.id);
   const [recon, setRecon] = useState(true);
   const {
     minimizeChatWindow,
@@ -95,7 +98,11 @@ function ChatWindow(props) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
   const [chatEnded, setChatEnded] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const [unread, setUnread] = useState(0);
+  const uploadFileRef = useRef(null);
   const navigate = useNavigate();
+
   useEffect(() => {
     if (images.length === 0) {
       setSize({ height: 0 });
@@ -109,8 +116,8 @@ function ChatWindow(props) {
       setChatHistory([]);
       if (!ignore) {
         setLoading(true);
-        await httpPrivate
-          .get(`/chat-message/messages/${chatRoom.id}`)
+        await httpPlain
+          .get(`/chat-message/messages/${chatRoom?.id}`)
           .then((response) => {
             // console.log(response.data);
             setChatHistory(response.data);
@@ -130,15 +137,15 @@ function ChatWindow(props) {
   }, [chatRoom]);
 
   useEffect(() => {
-    if (!wsRef.current && recon) {
+    if (!wsRef.current && recon && chatRoom?.id) {
       wsRef.current = websocket(
-        `api/chat/${chatRoom.id}/${chatRoom.customer_id}`
+        `api/chat/${chatRoom?.id}/${chatRoom?.customer_id}`
       );
 
       wsRef.current.onopen = (e) => {
         setChatActive(true);
         setRecon(false);
-        // console.log(wsRef.current);
+        console.log(`Connected to `, chatRoom?.chat_name);
       };
 
       wsRef.current.onmessage = (event) => {
@@ -155,24 +162,33 @@ function ChatWindow(props) {
             open: true,
             message: `${msgDetails.sender} : ${msgDetails.message}`,
           });
+
           setKey(`${msgDetails.message}${m().format("HH:mm:ss")}`);
         } else {
         }
       };
+
+      wsRef.current.onclose = () => {
+        console.log(`Chat disconnected to `, chatRoom?.chat_name);
+        setRecon(true);
+        setChatActive(false);
+        wsRef.current = null;
+      };
     }
-    wsRef.current.onclose = () => {
-      setRecon(true);
-      setChatActive(false);
-      wsRef.current = null;
-    };
+
     return () => {};
-  }, [wsRef.current, recon]);
+  }, [wsRef.current, recon, chatRoom]);
 
   useEffect(() => {
+    scrollToBottom();
+  }, [chatHistory]);
+
+  const scrollToBottom = (option) => {
     chatListRef?.current?.scroll({
       top: chatListRef.current.scrollHeight,
+      behavior: option?.behavior,
     });
-  }, [chatHistory]);
+  };
   const closeDialog = () => {
     setConfirmDialogOpen(false);
   };
@@ -183,12 +199,12 @@ function ChatWindow(props) {
     async function sendText(msg) {
       await wsRef.current?.send(
         JSON.stringify({
-          chat_room_id: chatRoom.id,
-          receiver_id: chatRoom.customer_id,
+          chat_room_id: chatRoom?.id,
+          receiver_id: chatRoom?.customer_id,
           message: msg,
           sender_id: user?.id,
           sender: properCase(user?.nick_name),
-          room_code: chatRoom.room_code,
+          room_code: chatRoom?.room_code,
           message_from: "CSR",
         })
       );
@@ -196,12 +212,12 @@ function ChatWindow(props) {
     async function sendImages() {
       await wsRef.current?.send(
         JSON.stringify({
-          chat_room_id: chatRoom.id,
-          receiver_id: chatRoom.customer_id,
+          chat_room_id: chatRoom?.id,
+          receiver_id: chatRoom?.customer_id,
           message: JSON.stringify(base64Array),
           sender_id: user?.id,
           sender: properCase(user?.nick_name),
-          room_code: chatRoom.room_code,
+          room_code: chatRoom?.room_code,
           message_from: "CSR",
         })
       );
@@ -235,14 +251,22 @@ function ChatWindow(props) {
   };
 
   const closeChat = () => {
-    wsRef.current.close();
-    closeChatWindow(chatRoom.id);
+    if (wsRef.current) {
+      if (wsRef.current.readyState === 1) {
+        wsRef.current.close();
+        setRecon(true);
+      }
+    }
+    closeChatWindow(chatRoom?.id);
   };
 
   const minimizeChat = (chatInfo) => {
-    wsRef.current.close();
-    setRecon(true);
-
+    if (wsRef.current) {
+      if (wsRef.current.readyState === 1) {
+        wsRef.current.close();
+        setRecon(true);
+      }
+    }
     minimizeChatWindow(chatInfo);
   };
 
@@ -281,6 +305,8 @@ function ChatWindow(props) {
     });
 
     setSize({ height: 100 });
+
+    e.target.value = "";
     // setState({ images: (prevImages) => [...prevImages, e.target.files] });
   };
   const confirmEndChat = async () => {
@@ -354,6 +380,14 @@ function ChatWindow(props) {
       // base64_array_buffer.push(ARRAY_BUFFER_TO_BASE64(rawData));
     };
     reader.readAsArrayBuffer(imgSelect);
+  };
+
+  const handleScroll = (element) => {
+    if (element.scrollHeight - element.scrollTop === element.clientHeight) {
+      setShowScrollButton(false);
+    } else {
+      setShowScrollButton(true);
+    }
   };
   return (
     <Box>
@@ -449,7 +483,7 @@ function ChatWindow(props) {
                     position: "fixed",
                   }}
                 />
-                <div className="text">{chatRoom.chat_name}</div>
+                <div className="text">{chatRoom?.chat_name}</div>
               </Grid>
               <Grid item xs={2} sx={{ textAlign: "end" }}>
                 <IconButton
@@ -511,14 +545,19 @@ function ChatWindow(props) {
                 <Grid item xs={12}>
                   <List
                     sx={{
-                      maxHeight: "70vh",
+                      maxHeight: "100%",
                       height: style.listHeight,
                       maxWidth: "100%",
                       overflow: "auto",
                       marginLeft: 1,
                       paddingRight: 1,
+                      display: "flex",
+                      flexDirection: "column",
                     }}
                     ref={chatListRef}
+                    onScroll={(e) => {
+                      handleScroll(e.target);
+                    }}
                   >
                     <ListItem disablePadding sx={{ paddingBottom: 1 }}>
                       <Grid container style={{ display: "block" }}>
@@ -536,7 +575,7 @@ function ChatWindow(props) {
                                 fontWeight: "bold",
                               }}
                             >
-                              {chatRoom.chat_name}
+                              {chatRoom?.chat_name}
                             </div>
                           </Grid>
                         </Grid>
@@ -588,8 +627,8 @@ function ChatWindow(props) {
                                       : "Messages-message"
                                   }
                                 >
-                                  <div className="Message-content">
-                                    <div className="avatar">
+                                  <Grid container className="Message-content">
+                                    <Grid item className="avatar">
                                       {!messageFromMe && (
                                         <AccountCircleIcon
                                           sx={{
@@ -612,58 +651,61 @@ function ChatWindow(props) {
                                           }}
                                         />
                                       )}
-                                    </div>
-                                    <div
-                                      className="text"
-                                      style={{
-                                        fontSize: "x-small",
-                                        textAlign: messageFromMe
-                                          ? "end"
-                                          : "start",
-                                      }}
-                                    >
-                                      {Array.isArray(image_message) ? (
-                                        <div className="photo-viewer">
-                                          {" "}
-                                          <PhotoProvider maskOpacity={0.8}>
-                                            {image_message?.map(
-                                              (imgUrl, index) => (
-                                                <PhotoView
-                                                  key={`PhotoView-${chat.id}-${index}`}
-                                                  src={`data:image/jpeg;base64,${imgUrl}`}
-                                                >
-                                                  <embed
-                                                    key={`img-${chat.id}-${index}`}
-                                                    style={{
-                                                      height: 100,
-                                                      width: "100px",
-                                                      borderRadius: "10px",
-                                                      padding: 0.5,
-                                                    }}
+                                    </Grid>
+                                    <Grid item className="text">
+                                      <div
+                                        style={{
+                                          fontSize: "x-small",
+                                          textAlign: messageFromMe
+                                            ? "end"
+                                            : "start",
+                                        }}
+                                      >
+                                        {Array.isArray(image_message) ? (
+                                          <div className="photo-viewer">
+                                            {" "}
+                                            <PhotoProvider maskOpacity={0.8}>
+                                              {image_message?.map(
+                                                (imgUrl, index) => (
+                                                  <PhotoView
+                                                    key={`PhotoView-${chat.id}-${index}`}
                                                     src={`data:image/jpeg;base64,${imgUrl}`}
-                                                    className="img"
-                                                  />
-                                                </PhotoView>
-                                              )
-                                            )}
-                                          </PhotoProvider>
-                                        </div>
-                                      ) : (
-                                        chat.message
-                                      )}
-                                      {/*
+                                                  >
+                                                    <img
+                                                      key={`img-${chat.id}-${index}`}
+                                                      style={{
+                                                        height: 200,
+                                                        width: "150px",
+                                                        borderRadius: "10px",
+                                                        margin: 2,
+                                                        objectFit: "scale-down",
+                                                        backgroundColor:
+                                                          "white",
+                                                      }}
+                                                      src={`data:image/jpeg;base64,${imgUrl}`}
+                                                      className="img"
+                                                    />
+                                                  </PhotoView>
+                                                )
+                                              )}
+                                            </PhotoProvider>
+                                          </div>
+                                        ) : (
+                                          chat.message
+                                        )}
+                                        {/*
                                               <img
                                                 src={`data:image/jpeg;base64,${chat.message}`}
                                               />
                                               */}
-
-                                      <div className="timestamp">
-                                        {m(chat.created_at).format(
-                                          "YYYY-MM-DD HH:mm:ss"
-                                        )}
                                       </div>
-                                    </div>
-                                  </div>
+                                    </Grid>
+                                    <Grid container className="timestamp">
+                                      {m(chat.created_at).format(
+                                        "YYYY-MM-DD HH:mm:ss"
+                                      )}
+                                    </Grid>
+                                  </Grid>
                                 </li>
                               </React.Fragment>
                             );
@@ -686,6 +728,7 @@ function ChatWindow(props) {
                         </React.Fragment>
                       );
                     })}
+                    <ListItem></ListItem>
                   </List>
                 </Grid>
               )}
@@ -695,7 +738,7 @@ function ChatWindow(props) {
               container
               sx={{ borderTopColor: "#808080", borderTop: 1 }}
             >
-              {+chatRoom.status_code === 3 && (
+              {+chatRoom?.status_code === 3 && (
                 <Grid item xs={12}>
                   <div className="chat-ended">
                     {" "}
@@ -703,7 +746,7 @@ function ChatWindow(props) {
                   </div>
                 </Grid>
               )}
-              {!(+chatRoom.status_code === 3) && (
+              {!(+chatRoom?.status_code === 3) && (
                 <Grid
                   item
                   xs={12}
@@ -783,6 +826,7 @@ function ChatWindow(props) {
                                       onChange={handleFileChange}
                                       name="file"
                                       multiple
+                                      ref={uploadFileRef}
                                     />
                                     <PhotoIcon
                                       style={{
@@ -835,75 +879,88 @@ function ChatWindow(props) {
                       />
                     </Grid>
                   </Grid>
-                  <Grid container>
-                    <Grid item xs={12}>
-                      <Grid container>
-                        <Grid item xs={12}>
-                          <ImageList
-                            cols={10}
-                            sx={{
-                              padding: 0,
-                              height: size.height,
-                            }}
-                            gap={5}
-                          >
-                            {images.map((img, index) => {
-                              const fileType = img.type.split("/");
-                              return (
-                                <ImageListItem
-                                  key={index}
-                                  sx={{
-                                    border: 1,
-                                  }}
-                                >
-                                  {fileType[0] === "image" && (
-                                    <img
-                                      src={URL.createObjectURL(img)}
-                                      style={{
-                                        width: 105,
-                                        height: 30,
-                                      }}
-                                    />
-                                  )}
-                                  {
-                                    fileType[0] === "video" && 
-                                    <video src={URL.createObjectURL(img)}></video> 
-                                  }
-
-                                  <ImageListItemBar
-                                    position="top"
-                                    actionIcon={
-                                      <Tooltip title="Remove">
-                                        <IconButton
-                                          onClick={() => {
-                                            handleImageDelete(img);
-                                          }}
-                                        >
-                                          <CloseIcon
-                                            fontSize="small"
-                                            style={{
-                                              color: "#fca103",
-                                            }}
-                                          />
-                                        </IconButton>
-                                      </Tooltip>
-                                    }
-                                    actionPosition="right"
-                                  />
-                                </ImageListItem>
-                              );
-                            })}
-                          </ImageList>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                  </Grid>
                 </Grid>
               )}
             </Grid>
           </div>
         </div>
       </Slide>
+
+      <Fab
+        id="scrolldown-button"
+        size="small"
+        color="primary"
+        sx={{ display: showScrollButton ? "block" : "none" }}
+        className="chat-list-footer"
+        onClick={() => {
+          scrollToBottom({ behavior: "smooth" });
+        }}
+      >
+        <ArrowDownwardIcon fontSize="inherit" />
+      </Fab>
+
+      <ImageList
+        cols={15}
+        sx={{
+          marginLeft: 3,
+          marginRight: 3,
+          height: size.height,
+          backgroundColor: "gray",
+          opacity: 0.8,
+          position: "relative",
+          top: "-180px",
+          borderRadius: 2,
+        }}
+        gap={5}
+      >
+        {images.map((img, index) => {
+          const fileType = img.type.split("/");
+          return (
+            <ImageListItem
+              key={index}
+              sx={{
+                border: 1,
+                margin: 0.5,
+              }}
+            >
+              {fileType[0] === "image" && (
+                <img
+                  src={URL.createObjectURL(img)}
+                  style={{
+                    width: 105,
+                    height: 90,
+                    objectFit: "scale-down",
+                  }}
+                />
+              )}
+              {fileType[0] === "video" && (
+                <video src={URL.createObjectURL(img)}></video>
+              )}
+
+              <ImageListItemBar
+                position="top"
+                actionIcon={
+                  <Tooltip title="Remove">
+                    <IconButton
+                      onClick={() => {
+                        handleImageDelete(img);
+                      }}
+                    >
+                      <CloseIcon
+                        fontSize="small"
+                        style={{
+                          color: "#fca103",
+                        }}
+                      />
+                    </IconButton>
+                  </Tooltip>
+                }
+                actionPosition="right"
+              />
+            </ImageListItem>
+          );
+        })}
+      </ImageList>
     </Box>
   );
 }
