@@ -30,8 +30,6 @@ class ChatMessageController extends Controller
     {
 
 
-
-
         return ChatMessage::join('call_queues', 'call_queues.id', '=', 'chat_messages.queue_id')
             ->leftJoin("users as csr", "csr.id", '=', DB::raw("IF(chat_messages.message_from='CSR', sender_id, receiver_id )"))
             ->leftJoin("web3.users_info as customer", "customer.user_id", '=', DB::raw("IF(chat_messages.message_from='CUSTOMER', sender_id, receiver_id)"))
@@ -42,7 +40,9 @@ class ChatMessageController extends Controller
                 "chat_messages.*"
             )
             ->where('chat_room_id', $room_id)
-            ->orderBy("chat_messages.id", "ASC")
+            ->skip($request->start)
+            ->take($request->length)
+            ->orderBy("chat_messages.id", "DESC")
             ->get();
 
 

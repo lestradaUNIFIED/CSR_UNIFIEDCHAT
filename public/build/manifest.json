@@ -85,7 +85,7 @@
     "src": "resources/js/assets/images/sample/video.jpg"
   },
   "resources/js/index.css": {
-    "file": "assets/index-ca7950e3.css",
+    "file": "assets/index-139db972.css",
     "src": "resources/js/index.css"
   },
   "resources/js/index.jsx": {
@@ -93,12 +93,12 @@
       "assets/Unified_Logo-01-eb9d1ddf.png"
     ],
     "css": [
-      "assets/index-ca7950e3.css"
+      "assets/index-139db972.css"
     ],
     "dynamicImports": [
       "node_modules/web-vitals/dist/web-vitals.js"
     ],
-    "file": "assets/index-3bbbbefc.js",
+    "file": "assets/index-ee5238ad.js",
     "isEntry": true,
     "src": "resources/js/index.jsx"
   }

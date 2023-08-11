@@ -12,10 +12,10 @@ import { ChatProvider } from "./ChatProvider";
 const providers = [
   AuthProvider,
   NotificationProvider,
-  ChatProvider,
   QueueProvider,
   RolesProvider,
   WebsocketProvider,
+  ChatProvider,
   DialogProvider,
   ChatWindowProvider,
 ];

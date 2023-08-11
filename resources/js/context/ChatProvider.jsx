@@ -3,23 +3,29 @@ import useAuth from "../hooks/useAuth";
 import m from 'moment';
 import websocket from "../services/Ws";
 import NotificationContext from "./DesktopNotificationProvider";
-
+import useCategoryAccess from "../hooks/useCategoryAccess";
 const ChatContext = createContext({});
 
 export const ChatProvider = ({ children }) => {
+  
+  const getRoomState = () => {
+    return JSON.parse(sessionStorage.getItem("roomState")) || {};
+  }
+
   const [lastChat, setLastChat] = useState({});
-  const [roomState, setRoomState] = useState({});
+  const [roomState, setRoomState] = useState(getRoomState());
   const [recon, setRecon] = useState(false);
   const [ws, setWs] = useState(null);
   const [chatActive, setChatActive] = useState(false);
   const { auth } = useAuth();
+  const { ALLOWED_CATEGORY } = useCategoryAccess();
   const { setNotif } = useContext(NotificationContext);
   const user = auth?.token?.user 
   const wsRef = useRef(null);
   
   useEffect(() => {
     let ignore = false;
-    if (!wsRef.current && !recon) {
+    if (!wsRef.current && !recon && ALLOWED_CATEGORY.length > 0) {
       wsRef.current = websocket(`api/chat?csr_id=${user?.id}`);
 
       wsRef.current.onopen = (e) => {
@@ -37,15 +43,19 @@ export const ChatProvider = ({ children }) => {
         let realMessage = JSON.parse(message.text);
         realMessage.queue_info = `{"queue_status":"ONGOING", "queue_id": ${realMessage.queue_id}}`;
         const messageFromMe = msgDetails.message_from === "CSR";
+        
+        if(ALLOWED_CATEGORY.find((cat) => cat === '*' ? true : +cat === realMessage.category_id)) {
+          setLastChat(realMessage);
+          if (!messageFromMe) {
+            setNotif({
+              open: true,
+              message: `${msgDetails.sender} : ${msgDetails.message}`,
+            });
+          } 
 
-        setLastChat(realMessage);
-        if (!messageFromMe) {
-          setNotif({
-            open: true,
-            message: `${msgDetails.sender} : ${msgDetails.message}`,
-          });
-        } else {
         }
+       
+        
       };
 
       wsRef.current.onclose = () => {
@@ -68,41 +78,51 @@ export const ChatProvider = ({ children }) => {
     };
 
     // setWs(chatWs);
-  }, []);
+  }, [wsRef.current, recon, ALLOWED_CATEGORY]);
+
 
   useEffect(() => {
     //  console.log(chatHistory)
-
     if (!roomState[lastChat.room_code] && lastChat.room_code) {
-      setRoomState((prev) => ({
-        ...prev,
-        [lastChat.room_code]: { unread: 1, lastMessage: lastChat.message },
-      }));
+
+      const newRoomState = {...roomState, [lastChat.room_code]: {unread : 1, lastMessage: lastChat.message}}
+      saveRoomState(newRoomState);
+
+
     } else {
       if (lastChat.message_from === "CUSTOMER") {
-        setRoomState({
+        const updateRoomState = {
           ...roomState,
           [lastChat.room_code]: {
             ...roomState[lastChat.room_code],
             unread: roomState[lastChat.room_code]?.unread + 1,
             lastMessage: lastChat.message,
           },
-        });
+        };
+       
+        saveRoomState(updateRoomState);
       } else {
-        setRoomState({
+        const updateRoomState = {
           ...roomState,
           [lastChat.room_code]: {
             ...roomState[lastChat.room_code],
             lastMessage: lastChat.message,
           },
-        });
+        }
+        saveRoomState(updateRoomState);
       }
     }
+    
   }, [lastChat]);
 
+  const saveRoomState = (roomState) => {
+      setRoomState(roomState)
+      sessionStorage.setItem("roomState", JSON.stringify(roomState));
+  }
+  
   return (
     <ChatContext.Provider
-      value={{ lastChat, setLastChat, roomState, setRoomState }}
+      value={{ lastChat, setLastChat, roomState, setRoomState : saveRoomState}}
     >
       {children}
     </ChatContext.Provider>

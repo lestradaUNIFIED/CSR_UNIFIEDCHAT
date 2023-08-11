@@ -9,43 +9,14 @@ export const AuthProvider = ({ children }) => {
   );
   const [categories, setCategories] = useState([]);
   const [categoryTemplates, setCategoryTemplates] = useState([]);
+  const [ALLOWED_CATEGORY, SET_ALLOWED_CATEGORY] = useState([]);
+
+  const GET_ALLOWED_CATEGORY = (CATEGORY) => {
+      SET_ALLOWED_CATEGORY(CATEGORY);
+  }
   
-  useEffect(() => {
-    let ignore = false;
-    const loadCategories = async () => {
-      const response = await httpPrivate.get("/all-category");
-      setCategories(response.data);
-    };
-    if (!ignore) {
-      loadCategories();
-    }
-
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
-
-  useEffect(() => {
-    async () => {
-      
-    }
-    let ignore = false;
-    const loadTemplates = async () => {
-      const response = await httpPrivate.get("/category-template");
-      setCategoryTemplates(response.data);
-    };
-    if (!ignore) {
-      loadTemplates();
-    }
-
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
   return (
-    <AuthContext.Provider value={{ auth, setAuth, session, setSession, categories, categoryTemplates }}>
+    <AuthContext.Provider value={{ auth, setAuth, session, setSession, categories, categoryTemplates, setCategories, setCategoryTemplates, ALLOWED_CATEGORY, SET_ALLOWED_CATEGORY : GET_ALLOWED_CATEGORY }}>
       {children}
     </AuthContext.Provider>
   );

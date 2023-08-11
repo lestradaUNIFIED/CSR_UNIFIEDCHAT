@@ -30,7 +30,7 @@
 
     <title>Unified V3</title>
 
-    <link href="{{ asset('build/assets/index-ca7950e3.css') }}" rel="stylesheet" />
+    <link href="{{ asset('build/assets/index-139db972.css') }}" rel="stylesheet" /> 
     @viteReactRefresh
     @vite('resources/js/index.jsx')
 
@@ -38,8 +38,6 @@
 </head>
 
 <body>
-
-
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root">
 

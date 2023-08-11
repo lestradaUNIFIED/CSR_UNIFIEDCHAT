@@ -2,13 +2,13 @@ import { useContext, useEffect, useState } from "react";
 import useAuth from "./useAuth";
 
 const useCategoryAccess = () => {
-    const { auth, categoryTemplates } = useAuth();
+    const { auth, categoryTemplates, SET_ALLOWED_CATEGORY, ALLOWED_CATEGORY } = useAuth();
     const user = auth?.token?.user;
     const [ALLOWED_SUB_CATEGORY, SET_ALLOWED_SUB_CATEGORY] = useState([]);
-    const [ALLOWED_CATEGORY, SET_ALLOWED_CATEGORY] = useState([]);
-
+ 
 
     useEffect(() => {
+       //  console.log("Templates", categoryTemplates);
         
             if(auth?.token && categoryTemplates.length > 0) {
                 const USER_CATEGORY_TEMPLATE = JSON.parse(user?.category);

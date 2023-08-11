@@ -82,27 +82,13 @@ function ChatRoom() {
     useParams() || 1;
   const { auth } = useAuth();
   const { ROLES } = useContext(RolesContext);
-  const [state, setState] = useState({ message: "", sender: "", images: [] });
   const [chatRooms, setChatRooms] = useState([]);
-  const [loading1, setLoading1] = useState(false);
-  const [chatHistory, setChatHistory] = useState([]);
-  const [unreadClass, setUnreadClass] = useState("chat-room");
-  const [sbOpen, setSbOpen] = useState({
-    open: false,
-    severity: "info",
-    message: "",
-  });
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [chatEnded, setChatEnded] = useState(false);
   const [chatRoom, setChatRoom] = useState({});
-  const [chatActive, setChatActive] = useState(false);
-  const [lastMessage, setLastMessage] = useState("");
-  const [images, setImages] = useState([]);
-  const [chatLength, setChatLength] = useState({ start: 0, length: 20 });
-
+   
   const navigate = useNavigate();
   const user = auth?.token.user;
-  const listBoxEl = useRef(null);
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -113,23 +99,16 @@ function ChatRoom() {
   //const websocketURL = `wss://unifiedchatapi.azurewebsites.net/api/chat/${roomCode}/${user.full_name}`;
 
   const isChatRoomValid = true;
-  const [recon, setRecon] = useState(false);
-  const [hover, setHover] = useState(false);
-  //const pickerRef = useRef();
-  const { setNotif } = useContext(NotificationContext);
+   //const pickerRef = useRef();
   const wsRef = useRef(null);
-  const { dialog, setDialog } = useDialog();
   const [concernStatus, setConcernStatus] = useState("RESOLVED");
   const [remarks, setRemarks] = useState("");
-  const { properCase } = useFunctions();
   const [selectedTab, setSelectedTab] = useState(+roomStatus - 1 || 1);
   const [roomByStatus, setRoomByStatus] = useState({});
   const { showChatWindow } = useContext(ChatWindowContext);
   const { generateColor } = useRandomColorGenerator();
   const [chatMessageReady, setChatMessageReady] = useState(false);
-  const {roomState, setRoomState} = useContext(ChatContext);
- 
-
+  const { roomState, setRoomState } = useContext(ChatContext);
 
   useEffect(() => {
     let ignore = false;
@@ -161,7 +140,7 @@ function ChatRoom() {
             //   console.log(error);
           });
       }
-   
+
       getChatRooms();
     }
 
@@ -181,19 +160,22 @@ function ChatRoom() {
     }
   }, [roomId, chatRooms]);
 
-  const onChange = (event) => {
-    //   console.log(event.target.value)
-    setState({ message: event.target.value });
-  };
+ 
 
   const connectWebSocket = (value) => {
     //  alert('change connect')
 
     //   setWs(new WebSocket(websocketURL));
-    setRoomState({
-      ...roomState,
-      [value.room_code]: { ...roomState[value.room_code], unread: 0 },
-    });
+    // console.log(JSON.parse(sessionStorage.getItem("roomState")))
+    if (roomState[value.room_code]) {
+      setRoomState({
+        ...roomState,
+        [value.room_code]: {
+          ...roomState[value.room_code],
+          unread: 0,
+        },
+      });
+    }
     setChatRoom(value);
   };
 
@@ -441,7 +423,7 @@ function ChatRoom() {
                                     className={
                                       value.room_code === roomCode
                                         ? "selected-chat-room"
-                                        : unreadClass
+                                        : "chat-room"
                                     }
                                     key={`${index}${status}`}
                                   >
@@ -504,7 +486,7 @@ function ChatRoom() {
                                                       ? "flex"
                                                       : "none",
                                                   height: 10,
-                                                  width: 10
+                                                  width: 10,
                                                 }}
                                                 color="error"
                                               />
@@ -537,15 +519,25 @@ function ChatRoom() {
                                         </ListItemAvatar>
 
                                         <div>
-                                          <div className="chat-room-header">
+                                          <div
+                                            className="chat-room-header"
+                                            style={{
+                                              fontWeight:
+                                                roomState[value.room_code]
+                                                  ?.unread > 0
+                                                  ? "bold"
+                                                  : "normal",
+                                            }}
+                                          >
                                             {displayName}
                                           </div>
 
                                           <div className="chat-message-preview">
-                                            {(roomState[value.room_code]?.lastMessage ||  value.last_message).substring(
-                                              0,
-                                              20
-                                            ) + "..."}
+                                            {(
+                                              roomState[value.room_code]
+                                                ?.lastMessage ||
+                                              value.last_message
+                                            ).substring(0, 20) + "..."}
                                           </div>
                                         </div>
                                       </ListItemButton>

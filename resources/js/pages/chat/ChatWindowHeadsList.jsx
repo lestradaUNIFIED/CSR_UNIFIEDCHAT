@@ -1,7 +1,5 @@
 import { useContext, useRef, useState } from "react";
 import Draggable from "react-draggable";
-import {Rnd} from "react-rnd";
-import { Resizable } from "react-resizable";
 import ChatWindowContext from "../../context/ChatWindowProvider";
 import ChatWindow from "./ChatWindow";
 const ChatWindowHeadList = () => {
@@ -45,7 +43,7 @@ const ChatWindowHeadList = () => {
               chatList={value.chatHistory}
               windowControl
               style={{
-                width: "650px",
+                width: "700px",
                 listHeight: "31vh",
               }}
             />

@@ -1,13 +1,9 @@
 import axios from "axios";
 
-const BASE_URL = "https://csr-unifiedchat.azurewebsites.net";
-//const BASE_URL = "http://web.unifiedchat.ph";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || `https://csr-unifiedchat.azurewebsites.net`;
 
-//const BASE_URL = 'https://172.168.1.6:8000'
 const CHAT_API_URL = "http://localhost:8086/";
-
 export const httpClient = axios.create({
-  //baseURL: "https://172.168.1.6:8000/api",
   baseURL: `${BASE_URL}/api`,
 });
 
@@ -29,7 +25,6 @@ export const httpPlain = axios.create({
   },
   withCredentials: true,
 });
-
 
 export const httpAuth = axios.create({
   baseURL: BASE_URL,

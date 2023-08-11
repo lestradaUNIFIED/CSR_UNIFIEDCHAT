@@ -238,17 +238,19 @@ function Dashboard() {
         const updated_queue = updates.queue;
         const updated_chat_room = updates.chat_room;
 
+        queue.csr_nickname = updated_queue.csr_nickname;
+
+       // console.log('Updates', updates);
         wsRef.current.send(JSON.stringify(queue));
         // const chatWs = websocket(`/api/chat/${queue}`)
-        //console.log(updates);
+      //  console.log(updates);
         updated_queue.room_code = updated_chat_room.room_code;
         updated_queue.room_id = updated_chat_room.id; 
+    
+
         showChatWindow({chatRoom: updated_chat_room, chatHistory: []})
         setState({ data: updated_queue });
-
-        
-       
-            
+  
       }
 
       //else if (result.isDenied) {

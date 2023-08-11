@@ -48,7 +48,7 @@ import websocket from "../services/Ws";
 import QueueIcon from "@mui/icons-material/Queue";
 import useFunctions from "../hooks/useFunctions";
 import ChatWindowHeadList from "../pages/chat/ChatWindowHeadsList";
-
+import ChatContext from "../context/ChatProvider";
 const drawerWidth = 200;
 
 const openedMixin = (theme) => ({
@@ -128,7 +128,24 @@ const Layout = () => {
   const user = auth?.token?.user;
   const { queueRows, queueActive } = useContext(QueueContext);
   const { properCase } = useFunctions();
+  const { roomState } = useContext(ChatContext);
+  const [msgCount, setMsgCount] = useState(0);
   // console.log(auth)
+
+useEffect(() => {
+  setMsgCount(0);
+  let totalCount = 0;
+  Object.keys(roomState).forEach((key) => {
+    
+    //console.log(key);
+    if (key !== "undefined") {
+
+      totalCount += roomState[key].unread;
+    }
+  })
+  setMsgCount(totalCount);
+  
+}, [roomState])
 
   const Logout = () => {
     Swal.fire({
@@ -270,35 +287,48 @@ const Layout = () => {
                         }
                         style={{ width: "100%", height: 25 }}
                       >
-                        <ListItemButton
-                          component={Link}
-                          to={menu.url}
-                          sx={{
-                            justifyContent: open ? "initial" : "center",
-                            px: 2.5,
-                            height: "25px",
-                          }}
-                        >
-                          <ListItemIcon
+                        <Tooltip title={menu.key}>
+                          <ListItemButton
+                            component={Link}
+                            to={menu.url}
                             sx={{
-                              minWidth: 0,
-                              mr: open ? 3 : "auto",
-                              justifyContent: "center",
+                              justifyContent: open ? "initial" : "center",
+                              px: 2.5,
+                              height: "25px",
                             }}
                           >
-                            <FontAwesomeIcon
-                              icon={menu.icon}
-                              size="lg"
-                              style={{ color: menu.iconColor }}
-                            />
-                          </ListItemIcon>
-                          <ListItemText sx={{ opacity: open ? 1 : 0 }}>
-                            {" "}
-                            <span style={{ fontSize: "smaller" }}>
-                              {menu.key}
-                            </span>
-                          </ListItemText>
-                        </ListItemButton>
+                            <ListItemIcon
+                              sx={{
+                                minWidth: 0,
+                                mr: open ? 3 : "auto",
+                                justifyContent: "center",
+                              }}
+                            >
+                              {menu.key === "Chat" && (
+                                <Badge badgeContent={msgCount} color="info" size="small"  >
+                                  <FontAwesomeIcon
+                                    icon={menu.icon}
+                                    size="lg"
+                                    style={{ color: menu.iconColor }}
+                                  />
+                                </Badge>
+                              )}
+
+                              {menu.key !== "Chat" && (
+                                <FontAwesomeIcon
+                                  icon={menu.icon}
+                                  size="lg"
+                                  style={{ color: menu.iconColor }}
+                                />
+                              )}
+                            </ListItemIcon>
+                            <ListItemText sx={{ opacity: open ? 1 : 0 }}>
+                              <span style={{ fontSize: "smaller" }}>
+                                {menu.key}
+                              </span>
+                            </ListItemText>
+                          </ListItemButton>
+                        </Tooltip>
                       </div>
                     </ListItem>
                     <Divider />
@@ -355,13 +385,12 @@ const Layout = () => {
           }}
         >
           <Box className="App">
-          <ChatWindowHeadList />
+            <ChatWindowHeadList />
             <Routers />
           </Box>
         </div>
       </LocalizationProvider>
-     
- 
+
       <div style={{ position: "absolute", top: "10%", right: "20px" }}>
         <Badge
           badgeContent={queueRows.length}
@@ -376,7 +405,6 @@ const Layout = () => {
             </Tooltip>
           </Fab>
         </Badge>
-  
       </div>
     </Box>
   );
