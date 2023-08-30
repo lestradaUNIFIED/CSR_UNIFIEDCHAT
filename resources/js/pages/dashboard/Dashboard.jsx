@@ -25,7 +25,8 @@ import QueueContext from "../../context/QueueProvider";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import useMomentLocale from "../../hooks/useMomentLocale";
 import useCategoryAccess from "../../hooks/useCategoryAccess";
-
+import ChatWindowHeadList from "../chat/ChatWindowHeadsList";
+import ChatWindowContext from "../../context/ChatWindowProvider";
 function Dashboard() {
   const { queueRows, setQueueRows, queueActive } = useContext(QueueContext);
   const { auth } = useAuth();
@@ -35,6 +36,7 @@ function Dashboard() {
   const [alertLevel, setAlertLevel] = useState(0);
   const { momentLocal, toPHTime } = useMomentLocale();
   const {ALLOWED_CATEGORY} = useCategoryAccess();
+  const {showChatWindow } = useContext(ChatWindowContext); 
   //console.log(session);
 
   const user = auth?.token?.user;
@@ -207,7 +209,7 @@ function Dashboard() {
   ];
 
   const UpdateQueue = (queue) => (e) => {
-    console.log(queue);
+   // console.log(queue);
 
     Swal.fire({
       title: "Update this Queue?",
@@ -236,18 +238,19 @@ function Dashboard() {
         const updated_queue = updates.queue;
         const updated_chat_room = updates.chat_room;
 
+        queue.csr_nickname = updated_queue.csr_nickname;
+
+       // console.log('Updates', updates);
         wsRef.current.send(JSON.stringify(queue));
         // const chatWs = websocket(`/api/chat/${queue}`)
-        //console.log(updates);
+      //  console.log(updates);
         updated_queue.room_code = updated_chat_room.room_code;
         updated_queue.room_id = updated_chat_room.id; 
-        setState({ data: updated_queue });
-       
-  
-
-        
     
-        
+
+        showChatWindow({chatRoom: updated_chat_room, chatHistory: []})
+        setState({ data: updated_queue });
+  
       }
 
       //else if (result.isDenied) {
@@ -288,10 +291,7 @@ function Dashboard() {
   //   };
   // }, [ongoingWs, ongoingWs.onopen]);
 
-  if (state.data.queue_status === "ONGOING" && state.data.transaction==='CHAT') {
-    const url = `/chat/dm/${state.data.room_code}/${state.data.caller_id}/${state.data.room_id}/${state.data.id}/2`;
-    return <Navigate to={url} />;
-  }
+ 
   if (state.data.queue_status === "ONGOING" && state.data.transaction==='VIDEO CALL') {
     const url = `/video-call/meeting/${state.data.room_code}`;
     return <Navigate to={url} state={state.data} />;
@@ -299,7 +299,7 @@ function Dashboard() {
 
   return (
     <Box>
-      <HelmetProvider>
+       <HelmetProvider>
         <Helmet>
           <title>Dashboard</title>
         </Helmet>

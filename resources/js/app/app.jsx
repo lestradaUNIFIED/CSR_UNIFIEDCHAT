@@ -7,21 +7,19 @@ import { Box } from "@mui/material";
 import { useEffect } from "react";
 import { ToastContainer } from "react-toastify";
 import { httpPrivate } from "../services/Api";
-import useCategory from "../hooks/useCategory";
-import useCategoryTemplate from "../hooks/useCategoryTemplates";
+
 import '../bootstrap'
 
 
 function App() {
-  const { auth, session, setAuth } = useAuth();
-  const {categories } = useCategory();
-  const { categoryTemplates } = useCategoryTemplate();
-  
+  const { auth, session, setAuth, setCategories, setCategoryTemplates } = useAuth();
+
   useEffect(() => {
     let ignore = false;
     if (!ignore) {
       if (session?.sessionUser?.id) {
         async function loadUserInfo() {
+         // console.log('loadUserInfo')
           await httpPrivate
             .get(`/user/${session?.sessionUser?.id}`)
             .then((response) => {
@@ -29,6 +27,13 @@ function App() {
            //   console.log(token)
               setAuth({ token });
             });
+
+          const categories = await httpPrivate.get("/all-category");
+          setCategories(categories.data);
+          const categoryTemplates = await httpPrivate.get("/category-template");
+          setCategoryTemplates(categoryTemplates.data);
+
+
         }
         loadUserInfo();
       }

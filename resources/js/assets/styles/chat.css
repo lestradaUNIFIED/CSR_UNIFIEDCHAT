@@ -36,7 +36,8 @@
 
 .Message-content > .text {
     padding: 10px;
-    max-width: 50vw;
+    min-width: 12vw;
+    max-width: 40vw;
     margin-left: 10px;
     margin-right: 5px;
     border-radius: 10px;
@@ -50,9 +51,24 @@
 
 .currentMember > .Message-content .text {
     background-color: #fda862;
-    text-align: end;
-    max-width: 50vw;
+    text-align: left;
+    max-width: 40vw;
 }
+
+.Message-content > .timestamp {
+    display: block;
+    font-size: 8px;
+    color: #1f1e1e;
+    bottom: -10px;
+    margin-left: 30px;
+    margin-right: 30px;
+
+}
+
+.currentMember > .Message-content .timestamp {
+    text-align: end;
+}
+
 .currentMember > .Message-content {
     display: flex;
     flex-direction: row-reverse;
@@ -101,13 +117,7 @@
     font-weight: 600;
 }
 
-.timestamp {
-    display: block;
-    font-size: xx-small;
-    color: #1f1e1e;
-    position: relative;
-    bottom: -10px;
-}
+
 
 .search-bar {
     border-right-width: 1px;
@@ -275,3 +285,26 @@
 .chat-window-profile {
     background-color: green;
 }
+
+.photo-viewer {
+    z-index: 9999999999999999999999;
+}
+
+.img:hover {
+    cursor: pointer;
+}
+
+.chat-list-footer {
+position: absolute;
+bottom: 100px;
+left: 45%;
+opacity: 0.7;
+}
+
+em-emoji-picker {
+    width: 100%;
+    min-width: 250px;
+    resize: horizontal;
+    overflow: auto;
+    height: 300px;
+  }

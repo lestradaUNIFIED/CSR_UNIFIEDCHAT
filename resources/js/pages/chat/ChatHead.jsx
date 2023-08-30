@@ -1,5 +1,5 @@
 import "../../assets/styles/chat.css";
-import { Fab, Zoom, Box, Badge } from "@mui/material";
+import { Fab, Zoom, Box, Badge, fabClasses, Avatar } from "@mui/material";
 import { useState, useRef, useEffect, useContext } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import websocket from "../../services/Ws";
@@ -58,8 +58,14 @@ const ChatHead = (props) => {
 
 
 const removeChatHead = () => {
-  setRecon(false);
-  wsRef.current.close();
+  if (wsRef.current) {
+    if (wsRef.current.readyState === 1) {
+      wsRef.current.close();
+      setRecon(fabClasses);
+    }
+  }
+ 
+ 
   deleteChatHead({chatRoom, chatHistory});
 
 }
@@ -85,14 +91,6 @@ const removeChatHead = () => {
               className="closeChatHeadButton"
               style={{
                 display: closeButton ? "flex" : "none",
-              }}
-              onMouseEnter={(e) => {
-                //  e.stopPropagation();
-                setCloseButton(true);
-              }}
-              onMouseLeave={(e) => {
-                //    e.stopPropagation();
-                setCloseButton(false);
               }}
               onClick={removeChatHead}
               size="small"

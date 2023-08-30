@@ -11,7 +11,7 @@ import Swal from "sweetalert2";
 import AuthContext from "../../context/AuthProvider";
 import { httpPrivate, httpAuth } from "../../services/Api";
 function Login() {
-  const { setSession, setAuth } = useContext(AuthContext);
+  const { setSession, setAuth, setCategories, setCategoryTemplates } = useContext(AuthContext);
   const HandleSubmit = async (event) => {
     event.preventDefault();
     // console.log('Event', event);
@@ -25,7 +25,7 @@ function Login() {
       console.log(response);
       httpPrivate
         .post("/login", loginCredentials)
-        .then((response) => {
+        .then(async (response) => {
           //  console.log(response.data);
           const token = response.data;
           const sessionUser = {
@@ -34,6 +34,11 @@ function Login() {
           setAuth({ token });
           setSession({ sessionUser });
           sessionStorage.setItem("session", JSON.stringify({ sessionUser }));
+          
+          const categories = await httpPrivate.get("/all-category");
+          setCategories(categories.data);
+          const categoryTemplates = await httpPrivate.get("/category-template");
+          setCategoryTemplates(categoryTemplates.data);
         })
         .catch((error, response) => {
           console.log("Unauthorized!", error, response);

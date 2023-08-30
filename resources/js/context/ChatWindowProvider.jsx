@@ -1,10 +1,8 @@
 import React from "react";
 import { createContext, useState } from "react";
-import { Stack, Box } from "@mui/material";
+import { Stack, Box, AvatarGroup } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import ChatWindow from "../pages/chat/ChatWindow";
 import ChatHead from "../pages/chat/ChatHead";
-import Draggable from "react-draggable";
 
 const ChatWindowContext = createContext({});
 
@@ -15,7 +13,7 @@ export const ChatWindowProvider = ({ children }) => {
 
   const showChatWindow = (chatInfo) => {
     const { chatRoom } = chatInfo;
-    console.log(chatRoom);
+  //  console.log(chatRoom);
     if (
       chatWindow.findIndex((value) => value.chatRoom.id === chatRoom.id) === -1
     ) {
@@ -72,9 +70,10 @@ export const ChatWindowProvider = ({ children }) => {
       <div
         style={{
           position: "fixed",
-          right: "10px",
+          left: "100px",
           textAlign: "right",
           bottom: "50px",
+          zIndex: "99999"
         }}
       >
         <Stack
@@ -85,15 +84,18 @@ export const ChatWindowProvider = ({ children }) => {
             height: "100%",
           }}
         >
+          <AvatarGroup max={5} sx={{display: "flex", flexDirection: "column"}} >
           {chatHead.map((value, index) => {
             return (
-              <React.Fragment key={index}>
-                <Box>
+              
+                <Box key={`ChatHead-${value.chatRoom.id}`} sx={{padding: 0.5}}>
                   <ChatHead key={value.chatRoom.id} chatInfo={value} />
                 </Box>
-              </React.Fragment>
+              
             );
           })}
+
+          </AvatarGroup>
         </Stack>
       </div>
 

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('category_id')->nullable()->default(null);
             $table->integer('sub_category_id')->nullable()->default(null);
             $table->integer('csr_id')->nullable()->default(null);
-            $table->enum('queue_status', ['WAITING', 'ONGOING', 'RESOLVED', 'PENDING'])->default('WAITING');
+            $table->enum('queue_status', ['WAITING', 'ONGOING', 'RESOLVED', 'PENDING', 'CANCELLED'])->default('WAITING');
             $table->timestamp('date_onqueue')->useCurrent();
             $table->timestamp('date_ongoing')->nullable()->default(null);
             $table->timestamp('date_end')->nullable()->default(null);

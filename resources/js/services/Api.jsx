@@ -1,12 +1,9 @@
 import axios from "axios";
-import useAuth from "../hooks/useAuth";
 
-const BASE_URL = "http://web.unifiedchat.ph";
-//const BASE_URL = 'https://172.168.1.6:8000'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || `https://csr-unifiedchat.azurewebsites.net`;
+
 const CHAT_API_URL = "http://localhost:8086/";
-
 export const httpClient = axios.create({
-  //baseURL: "https://172.168.1.6:8000/api",
   baseURL: `${BASE_URL}/api`,
 });
 
@@ -15,7 +12,16 @@ export const httpPrivate = axios.create({
   baseURL: `${BASE_URL}/api`,
   headers: {
     "Content-Type": "application/json",
-    Accept : "application/json"
+    Accept: "application/json",
+  },
+  withCredentials: true,
+});
+
+export const httpPlain = axios.create({
+  baseURL: `${BASE_URL}/api`,
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
   },
   withCredentials: true,
 });

@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta name="description" content="Web site created using create-react-app" />
-    <link rel="icon" href="{{ Vite::asset('resources/js/assets/images/icons/ups-logo.png') }}" />
+    <link rel="icon" href="{{ asset('build/assets/ups-logo-3c01c958.png') }}" />
     <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
@@ -29,15 +29,15 @@
     <script src="https://meet.jit.si/external_api.js"></script>
 
     <title>Unified V3</title>
- 
+
+    <link href="{{ asset('build/assets/index-139db972.css') }}" rel="stylesheet" /> 
     @viteReactRefresh
     @vite('resources/js/index.jsx')
 
-   
+
 </head>
 
 <body>
-
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root">
 

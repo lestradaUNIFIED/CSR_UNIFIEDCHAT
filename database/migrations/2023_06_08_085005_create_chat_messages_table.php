@@ -20,7 +20,7 @@ return new class extends Migration
             $table->integer('queue_id')->nullable()->default(null);
             $table->integer('sender_id')->nullable()->default(null);
             $table->integer('receiver_id')->nullable()->default(null);
-            $table->text('message')->nullable()->default(null);
+            $table->longText('message')->nullable()->default(null);
             $table->integer('read_status')->default(0);
             $table->timestamp('received_at')->nullable()->default(null);
             $table->timestamp('created_at')->useCurrent();

@@ -6,17 +6,30 @@ const useToastify = () => {
   const createToast = (toastInfo) => {
     switch (toastInfo.type) {
       case "info":
-        toast.info(toastInfo.message, {style : {
-          color: '#ffffff',
-          backgroundColor: '#053ef7'
-        }} );
+        toast.info(toastInfo.message, {
+          style: {
+            color: "#ffffff",
+            backgroundColor: "#053ef7",
+          },
+        });
         break;
       case "warning":
-        toast.warning(toastInfo.message, {style : {
-          color: '#ffffff',
-          backgroundColor: '#f77605'
-        }});
+        toast.warning(toastInfo.message, {
+          style: {
+            color: "#ffffff",
+            backgroundColor: "#f77605",
+          },
+        });
         break;
+      case "error":
+        toast.error(toastInfo.message, {
+          style: {
+            color: "#ffffff",
+            backgroundColor: "#bd0404",
+          },
+        });
+        break;
+
       case "success":
         toast.success(toastInfo.message);
         break;
@@ -24,7 +37,7 @@ const useToastify = () => {
   };
 
   return {
-    createToast
+    createToast,
   };
 };
 

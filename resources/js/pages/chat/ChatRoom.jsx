@@ -30,6 +30,7 @@ import {
   Tab,
   Stack,
   Slide,
+  Badge,
 } from "@mui/material";
 import { useEffect, useState, useRef, useContext } from "react";
 import "../../assets/styles/chat.css";
@@ -72,7 +73,8 @@ import ChatWindowContext from "../../context/ChatWindowProvider";
 import useRandomColorGenerator from "../../hooks/useRandomColorGenerator";
 import ChatWindow from "./ChatWindow";
 import ChatWindowHeadList from "./ChatWindowHeadsList";
-
+import DoDisturbOffIcon from "@mui/icons-material/DoDisturbOff";
+import ChatContext from "../../context/ChatProvider";
 function ChatRoom() {
   // const messages = this.state.messages;
 
@@ -80,28 +82,13 @@ function ChatRoom() {
     useParams() || 1;
   const { auth } = useAuth();
   const { ROLES } = useContext(RolesContext);
-  const [state, setState] = useState({ message: "", sender: "", images: [] });
   const [chatRooms, setChatRooms] = useState([]);
-  const [loading1, setLoading1] = useState(false);
-  const [chatHistory, setChatHistory] = useState([]);
-  const [unreadClass, setUnreadClass] = useState("chat-room");
-  const [sbOpen, setSbOpen] = useState({
-    open: false,
-    severity: "info",
-    message: "",
-  });
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [chatEnded, setChatEnded] = useState(false);
-  const [showEmojis, setShowEmojis] = useState(false);
   const [chatRoom, setChatRoom] = useState({});
-  const [chatActive, setChatActive] = useState(false);
-  const [lastMessage, setLastMessage] = useState("");
-  const [images, setImages] = useState([]);
-  const [chatLength, setChatLength] = useState({ start: 0, length: 20 });
-
+   
   const navigate = useNavigate();
   const user = auth?.token.user;
-  const listBoxEl = useRef(null);
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -112,99 +99,16 @@ function ChatRoom() {
   //const websocketURL = `wss://unifiedchatapi.azurewebsites.net/api/chat/${roomCode}/${user.full_name}`;
 
   const isChatRoomValid = true;
-  const [ws, setWs] = useState(null);
-  const [recon, setRecon] = useState(false);
-  const [hover, setHover] = useState(false);
-  //const pickerRef = useRef();
-  const { setNotif } = useContext(NotificationContext);
+   //const pickerRef = useRef();
   const wsRef = useRef(null);
-  const { dialog, setDialog } = useDialog();
   const [concernStatus, setConcernStatus] = useState("RESOLVED");
   const [remarks, setRemarks] = useState("");
-  const { properCase } = useFunctions();
   const [selectedTab, setSelectedTab] = useState(+roomStatus - 1 || 1);
   const [roomByStatus, setRoomByStatus] = useState({});
   const { showChatWindow } = useContext(ChatWindowContext);
   const { generateColor } = useRandomColorGenerator();
   const [chatMessageReady, setChatMessageReady] = useState(false);
-
-  useEffect(() => {
-    let ignore = false;
-
-    if (!ignore && roomId && customerId && !recon && !wsRef.current) {
-      wsRef.current = websocket(`api/chat/${roomId}/${customerId}`);
-
-      wsRef.current.onopen = (e) => {
-        open(e);
-        function open(e) {
-          setChatActive(true);
-          setWs(true);
-          setRecon(true);
-          console.log(
-            "Chat Connected ",
-            m().format("YYYY-MM-DD HH:mm:ss"),
-            wsRef.current
-          );
-        }
-      };
-      wsRef.current.onmessage = (event) => {
-        //   console.log(event.data);
-
-        const message = JSON.parse(event.data);
-
-        const msgDetails = JSON.parse(message.text);
-
-        const chatMsg = message.chatMessage;
-        let realMessage = JSON.parse(message.text);
-        //console.log(realMessage);
-        realMessage.queue_info = `{"queue_status":"ONGOING", "queue_id": ${queueId}}`;
-        const messageFromMe = msgDetails.message_from === "CSR";
-
-        // console.log();
-        setChatHistory((chatH) => [...chatH, realMessage]);
-        if (!messageFromMe) {
-          setLastMessage(`${msgDetails.sender} : ${msgDetails.message}`);
-          setNotif({
-            open: true,
-            message: `${msgDetails.sender} : ${msgDetails.message}`,
-          });
-        } else {
-        }
-      };
-
-      wsRef.current.onclose = () => {
-        console.log("Chat Disconnected!", m().format("YYYY-MM-DD HH:mm:ss"));
-        setChatActive(false);
-
-        setTimeout(() => {
-          wsRef.current = null;
-          setWs(false);
-          setRecon(false);
-        }, 5000);
-        ignore = false;
-      };
-    }
-    return () => {
-      //  wsRef.current?.close();
-      ignore = true;
-      //ws.close();
-    };
-
-    // setWs(chatWs);
-  }, [roomId, customerId, recon, wsRef]);
-
-  useEffect(() => {
-    if (isChatRoomValid) {
-      listBoxEl?.current?.scroll({
-        top: listBoxEl.current?.scrollHeight,
-        behavior: "smooth",
-      });
-      // listBoxEl?.current?.addEventListener("DOMNodeInserted", (event) => {
-      //   const { currentTarget: target } = event;
-      //   target.scroll({ top: target.scrollHeight, behavior: "smooth" });
-      // });
-    }
-  }, [isChatRoomValid, chatHistory]);
+  const { roomState, setRoomState } = useContext(ChatContext);
 
   useEffect(() => {
     let ignore = false;
@@ -236,7 +140,7 @@ function ChatRoom() {
             //   console.log(error);
           });
       }
-      console.log("ROOM!!! ");
+
       getChatRooms();
     }
 
@@ -246,126 +150,39 @@ function ChatRoom() {
   }, []);
 
   useEffect(() => {
-    let ignore = false;
-
     if (roomId) {
-      async function getChatRoom() {
-        await httpPrivate.get(`/chat-room/${roomId}`).then((response) => {
-          setChatRoom(response.data);
-        });
-      }
-
-      async function getChat() {
-        setChatHistory([]);
-        setLoading1(true);
-
-        if (!ignore) {
-          await httpPrivate
-            .get(`/chat-message/messages/${roomId}`, {
-              params: {
-                start: chatLength.start,
-                length: chatLength.length,
-              },
-            })
-            .then((response) => {
-              // console.log(response.data);
-              setChatHistory(response.data);
-            })
-            .catch((err) => {
-              console.log(err);
-            });
-        }
-        setLoading1(false);
-      }
-      setImages([]);
-      setUnreadClass("chat-room");
-      getChatRoom();
-      getChat();
-      setSelectedTab(+roomStatus - 1);
+      setChatRoom(chatRooms.find((rm) => rm.id === +roomId));
       setChatMessageReady(true);
+      //  console.log(chatRooms.find(rm => rm.id === +roomId));
+    } else {
+      setChatMessageReady(false);
+      setChatRoom({});
     }
-    return () => {
-      ignore = true;
-    };
-  }, [roomId]);
+  }, [roomId, chatRooms]);
 
-  const onChange = (event) => {
-    //   console.log(event.target.value)
-    setState({ message: event.target.value });
-  };
+ 
 
-  const connectWebSocket = (room_status) => {
+  const connectWebSocket = (value) => {
     //  alert('change connect')
 
     //   setWs(new WebSocket(websocketURL));
-    if (wsRef.current) {
-      wsRef.current.close();
-    }
-  };
-
-  const ARRAY_BUFFER_TO_BASE64 = (ARRAY_BUFFER) => {
-    let binary = "";
-    const bytes = new Uint8Array(ARRAY_BUFFER);
-    const len = bytes.byteLength;
-
-    for (let i = 0; i < len; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-
-    return window.btoa(binary);
-  };
-
-  const onSubmit = (event) => {
-    event.preventDefault();
-    //   console.log("send");
-    //saveMessage();
-    if (state.message === "" && images.length === 0) {
-      return;
-    }
-
-    if (state.message === "" && images.length > 0) {
-      console.log(base64Array.length);
-      setChatHistory((chatH) => [
-        ...chatH,
-        {
-          chat_room_id: roomId,
-          receiver_id: customerId,
-          message: base64Array.toString(),
-          sender_id: user.id,
-          sender: "CSR Agent",
-          room_code: roomCode,
-          message_from: "CSR",
-          queue_info: `{"queue_status":"ONGOING", "queue_id": ${queueId}}`,
+    // console.log(JSON.parse(sessionStorage.getItem("roomState")))
+    if (roomState[value.room_code]) {
+      setRoomState({
+        ...roomState,
+        [value.room_code]: {
+          ...roomState[value.room_code],
+          unread: 0,
         },
-      ]);
-    } else {
+      });
     }
-    let base64_array_buffer = [];
-
-    if (!(wsRef.current.readyState === 1)) {
-      alert("CANNOT SEND MESSAGE RIGHT NOW!");
-    } else {
-      wsRef.current?.send(
-        JSON.stringify({
-          chat_room_id: roomId,
-          receiver_id: customerId,
-          message: state.message,
-          sender_id: user.id,
-          sender: properCase(user.nick_name),
-          room_code: roomCode,
-          message_from: "CSR",
-          images: JSON.stringify(base64_array_buffer),
-        })
-      );
-      setState({ message: "" });
-    }
-
-    // websocket.close();
+    setChatRoom(value);
   };
+
   //console.log(user);
 
   useEffect(() => {
-    if (chatRoom.status_code === "3" || chatRoom.status_code === "1") {
+    if (chatRoom?.status_code === "3" || chatRoom?.status_code === "1") {
       setChatEnded(true);
     } else {
       setChatEnded(false);
@@ -424,64 +241,6 @@ function ChatRoom() {
     navigate("/");
   };
 
-  const openDialog = () => {
-    setConfirmDialogOpen(true);
-  };
-  const addEmoji = (e) => {
-    let sym = e.unified.split("-");
-    let codesArray = [];
-    sym.forEach((el) => codesArray.push("0x" + el));
-    let emoji = String.fromCodePoint(...codesArray);
-    setState({ message: state.message + emoji });
-  };
-
-  const handleFileChange = (e) => {
-    //console.log(e.target.files);
-    setUploadDetails({ file: e.target.files[0] });
-
-    Object.values(e.target.files).forEach((val) => {
-      setImages((prevImages) => [...prevImages, val]);
-
-      const reader = new FileReader();
-      let rawData = new ArrayBuffer();
-      reader.loadend = () => {};
-      reader.onload = (e) => {
-        rawData = e.target.result;
-        setBase64Array((arr) => [...arr, ARRAY_BUFFER_TO_BASE64(rawData)]);
-
-        //console.log('Raw Data', rawData);
-        //console.log('BASE 64', ARRAY_BUFFER_TO_BASE64(rawData))
-        // base64_array_buffer.push(ARRAY_BUFFER_TO_BASE64(rawData));
-      };
-      reader.readAsArrayBuffer(val);
-    });
-
-    setSize({ height: 100 });
-    // setState({ images: (prevImages) => [...prevImages, e.target.files] });
-  };
-
-  const handleUpload = () => {
-    const formData = new FormData();
-
-    images.forEach((img) => {
-      formData.append("file", img);
-    });
-
-    CHAT_API.post("/upload", formData, {
-      onUploadProgress: (ProgressEvent) => {
-        setUploadDetails({
-          loaded: (ProgressEvent.loaded / ProgressEvent.total) * 100,
-        });
-      },
-    })
-      .then((response) => {
-        console.log(response);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-
   //console.log('Chat Rooms', chatRooms);
 
   //return (<Navigate to="/notfound" />);
@@ -495,7 +254,7 @@ function ChatRoom() {
   };
 
   return (
-    <Box paddingTop={3}>
+    <Box paddingTop={3.5}>
       <HelmetProvider>
         <Helmet>
           <title>Chat</title>
@@ -505,7 +264,6 @@ function ChatRoom() {
 
       {isChatRoomValid && (
         <Box>
-    <ChatWindowHeadList />
           <Dialog fullScreen={fullScreen} open={confirmDialogOpen} fullWidth>
             <DialogTitle>{"End Chat?"}</DialogTitle>
             <DialogContent>
@@ -607,6 +365,12 @@ function ChatRoom() {
               value={0}
               label={`WAITING (${roomByStatus["0"]?.length || 0})`}
             />
+            <Tab
+              icon={<DoDisturbOffIcon color="error" />}
+              iconPosition="start"
+              value={4}
+              label={`CANCELLED (${roomByStatus["4"]?.length || 0})`}
+            />
           </Tabs>
 
           <Divider />
@@ -622,8 +386,8 @@ function ChatRoom() {
                           borderRightWidth: 1,
                           borderRight: 1,
                           borderRightColor: "#999999",
-                          height: "70vh",
-                          maxHeight: "70vh",
+                          height: "90vh",
+                          maxHeight: "80vh",
                           overflow: "auto",
                           fontSize: "smaller",
                           marginRight: 0,
@@ -659,18 +423,16 @@ function ChatRoom() {
                                     className={
                                       value.room_code === roomCode
                                         ? "selected-chat-room"
-                                        : unreadClass
+                                        : "chat-room"
                                     }
                                     key={`${index}${status}`}
                                   >
                                     <div>
                                       <ListItemButton
-                                        component={Link}
-                                        onClick={async () => {
-                                          connectWebSocket(
-                                            chatRoom.status_code
-                                          );
+                                        onClick={() => {
+                                          connectWebSocket(value);
                                         }}
+                                        component={Link}
                                         to={`/chat/dm/${value.room_code}/${value.customer_id}/${value.id}/${value.current_queue_id}/${value.status_code}`}
                                         sx={{
                                           height: "50px",
@@ -680,32 +442,40 @@ function ChatRoom() {
                                         <ListItemAvatar
                                           key={`ListItemAvatar${index}`}
                                         >
-                                          <Avatar
-                                            key={`Avatar${index}`}
-                                            sx={{
-                                              height: "30px",
-                                              width: "30px",
-                                              backgroundColor: "#0023bf",
-                                            }}
+                                          <Badge
+                                            badgeContent={
+                                              roomState[value.room_code]?.unread
+                                            }
+                                            color="error"
                                           >
-                                            <span
-                                              style={{
-                                                fontSize: "small",
-                                                fontWeight: "bold",
+                                            <Avatar
+                                              key={`Avatar${index}`}
+                                              sx={{
+                                                height: "30px",
+                                                width: "30px",
+                                                bgcolor: "#036ffc",
                                               }}
                                             >
-                                              {`${nameArray[0].charAt(
-                                                0
-                                              )}${nameArray[
-                                                nameArray.length - 1
-                                              ].charAt(0)}`}
-                                            </span>
-                                          </Avatar>
+                                              <span
+                                                style={{
+                                                  fontSize: "small",
+                                                  fontWeight: "bold",
+                                                }}
+                                              >
+                                                {`${nameArray[0].charAt(
+                                                  0
+                                                )}${nameArray[
+                                                  nameArray.length - 1
+                                                ].charAt(0)}`}
+                                              </span>
+                                            </Avatar>
+                                          </Badge>
+
                                           <span
                                             style={{
                                               position: "relative",
                                               top: "-10px",
-                                              right: "-18px",
+                                              right: "-20px",
                                             }}
                                           >
                                             <Tooltip title="Ongoing">
@@ -715,7 +485,8 @@ function ChatRoom() {
                                                     value.status_code === "2"
                                                       ? "flex"
                                                       : "none",
-                                                  fontSize: "small",
+                                                  height: 10,
+                                                  width: 10,
                                                 }}
                                                 color="error"
                                               />
@@ -748,14 +519,25 @@ function ChatRoom() {
                                         </ListItemAvatar>
 
                                         <div>
-                                          <div className="chat-room-header">
+                                          <div
+                                            className="chat-room-header"
+                                            style={{
+                                              fontWeight:
+                                                roomState[value.room_code]
+                                                  ?.unread > 0
+                                                  ? "bold"
+                                                  : "normal",
+                                            }}
+                                          >
                                             {displayName}
                                           </div>
+
                                           <div className="chat-message-preview">
-                                            {value.last_message.substring(
-                                              0,
-                                              20
-                                            ) + "..."}
+                                            {(
+                                              roomState[value.room_code]
+                                                ?.lastMessage ||
+                                              value.last_message
+                                            ).substring(0, 20) + "..."}
                                           </div>
                                         </div>
                                       </ListItemButton>
@@ -767,27 +549,24 @@ function ChatRoom() {
                                         textAlign: "end",
                                         width: "15%",
                                         right: "-85%",
-                                        display: "flex"
+                                        display: "flex",
                                       }}
                                     >
-                                      <Tooltip title="End Chat">
-                                        <IconButton sx={{padding: 0, paddingRight:0.3, display: value.status_code !== "3" ? "flex" : "none"}}>
-                                          <DoDisturbAltRoundedIcon
+                                      <Tooltip title="Pop-out Chat">
+                                        <IconButton
+                                          sx={{ padding: 0, display: "flex" }}
+                                          onClick={() => {
+                                            showChatWindow({
+                                              chatRoom: value,
+                                              chatHistory: [],
+                                            });
+                                          }}
+                                        >
+                                          <LaunchIcon
                                             style={{
                                               fontSize: "small",
                                             }}
-                                            color="error"
                                           />
-                                        </IconButton>
-                                      </Tooltip>
-                                      <Tooltip title="Pop-out Chat" >
-                                        <IconButton sx={{padding: 0, display: "flex"}} onClick={() => { showChatWindow({chatRoom : value, chatHistory: []}) }}>
-                                        <LaunchIcon
-                                        style={{
-                                          fontSize: "small",
-                                        }}
-                                      />
-
                                         </IconButton>
                                       </Tooltip>
                                     </div>
@@ -808,6 +587,7 @@ function ChatRoom() {
                               borderBottomWidth: 0,
                               borderBottom: 0,
                               borderBottomColsor: "#999999",
+                              height: "80vh",
                             }}
                           >
                             {roomCode === undefined && (
@@ -822,12 +602,15 @@ function ChatRoom() {
                                 Select a Convo
                               </Box>
                             )}
-                            {chatMessageReady && chatHistory.length > 0 && (
-                              <ChatWindow
-                                chatInfo={{ chatRoom, chatHistory }}
-                                chatList={chatHistory}
-                                key={roomId}
-                              />
+                            {chatMessageReady && (
+                              <Box sx={{ height: "100%" }}>
+                                <ChatWindow
+                                  chatInfo={{ chatRoom, chatHistory: [] }}
+                                  chatList={[]}
+                                  key={roomId}
+                                  style={{ listHeight: "69vh" }}
+                                />
+                              </Box>
                             )}
                           </Grid>
                         </Grid>
